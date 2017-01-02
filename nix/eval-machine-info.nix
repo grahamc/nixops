@@ -253,6 +253,9 @@ rec {
     )
   );
 
+  # Packet.net Resources
+  resources.packetSSHKeys = evalResources ./packet-sshkey.nix (zipAttrs resourcesByType.packetSSHKeys or []);
+
   # Phase 1: evaluate only the deployment attributes.
   info =
     let
@@ -269,6 +272,7 @@ rec {
           digitalOcean = optionalAttrs (v.config.deployment.targetEnv == "digitalOcean") v.config.deployment.digitalOcean;
           gce = optionalAttrs (v.config.deployment.targetEnv == "gce") v.config.deployment.gce;
           hetzner = optionalAttrs (v.config.deployment.targetEnv == "hetzner") v.config.deployment.hetzner;
+          packet = optionalAttrs (v.config.deployment.targetEnv == "packet") v.config.deployment.packet;
           container = optionalAttrs (v.config.deployment.targetEnv == "container") v.config.deployment.container;
           route53 = v.config.deployment.route53;
           virtualbox =

@@ -57,12 +57,14 @@ class PacketState(MachineState):
     def __init__(self, depl, name, id):
         MachineState.__init__(self, depl, name, id)
 
+
     @property
     def resource_id(self):
         return self.vm_id
 
     @property
     def public_ipv4(self):
+        return "0.0.0.0"
         return self.main_ipv4
 
     def _vm_id(self):
@@ -70,9 +72,11 @@ class PacketState(MachineState):
 
 
     def create_after(self, resources, defn):
-        return {r for r in resources if
+        ret = [r for r in resources if
             isinstance(r, nixops.resources.packet_sshkey.PacketSSHKeyState)
-        }
+        ]
+
+        return ret
 
     def create(self, defn, check, allow_reboot, allow_recreate):
         self.log("Creating new Packet server")
@@ -83,6 +87,12 @@ class PacketState(MachineState):
         ssh_key = self.depl.active_resources.get(defn.ssh_key)
         if ssh_key is None:
             raise Exception('Please specify an SSH key!')
+
+    def destroy(self, wipe):
+        if wipe:
+            log.warn("Wipe is not supported")
+
+        return True
 
     def get_ssh_private_key_file(self):
         for r in self.depl.active_resources.itervalues():

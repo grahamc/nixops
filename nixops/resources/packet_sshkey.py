@@ -112,8 +112,6 @@ class PacketSSHKeyState(nixops.resources.ResourceState):
 
     def destroy(self, wipe=False):
         if self.state == self.UP:
-            self.log("deleting Packet SSH key pair ‘{0}’...".format(self.keypair_name))
-            key = defn
-            self._conn.delete_key_pair(self.keypair_name)
+            raise "Not implemented"
 
         return True

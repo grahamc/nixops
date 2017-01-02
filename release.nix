@@ -8,6 +8,20 @@ let
 
   version = "1.5" + (if officialRelease then "" else "pre${toString nixopsSrc.revCount}_${nixopsSrc.shortRev}");
 
+  packet-python = pkgs.python2Packages.buildPythonPackage rec {
+    name = "packet-python-${version}";
+    version = "1.32";
+
+    propagatedBuildInputs = with pkgs.python2Packages; [
+      requests
+    ];
+
+    src = pkgs.fetchurl {
+      url = "https://pypi.python.org/packages/6a/d9/29436defcce2b66bfab55c6f1c326505b42e3f008a188859afc1717e8b31/packet-python-1.32.tar.gz";
+      sha256 = "0zss3l5hs7aq5ipic1n1908fnzp6q5bbx1r2xmvxvv18gxdhz1w3";
+    };
+  };
+
 in
 
 rec {
@@ -88,6 +102,7 @@ rec {
           azure-mgmt-resource
           azure-mgmt-storage
           adal
+          packet-python
           # Go back to sqlite once Python 2.7.13 is released
           pysqlite
           datadog

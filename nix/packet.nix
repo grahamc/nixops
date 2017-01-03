@@ -45,6 +45,14 @@ with lib;
         Packet SSH Key
       '';
     };
+
+    setup_script = mkOption {
+      type = types.lines;
+      description = ''
+        Formatting, partitioning, and mounting commands... :)
+      '';
+    };
+
   };
 
   ###### implementation

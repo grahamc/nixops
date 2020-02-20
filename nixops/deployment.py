@@ -310,7 +310,7 @@ class Deployment(object):
                 + self._eval_flags(self.nix_exprs) +
                 ["--eval-only", "--json", "--strict",
                  "-A", "nixopsArguments"], stderr=self.logger.log_file)
-            if debug: print("JSON output of nix-instantiate:\n" + xml, file=sys.stderr)
+            if debug: print("JSON output of nix-instantiate:\n" + xml.decode(), file=sys.stderr)
             return json.loads(out)
         except OSError as e:
             raise Exception("unable to run ‘nix-instantiate’: {0}".format(e))
@@ -327,7 +327,7 @@ class Deployment(object):
                 ["--eval-only", "--xml", "--strict",
                  "--arg", "checkConfigurationOptions", "false",
                  "-A", attr], stderr=self.logger.log_file)
-            if debug: print("XML output of nix-instantiate:\n" + xml, file=sys.stderr)
+            if debug: print("XML output of nix-instantiate:\n" + xml.decode(), file=sys.stderr)
         except OSError as e:
             raise Exception("unable to run ‘nix-instantiate’: {0}".format(e))
         except subprocess.CalledProcessError:

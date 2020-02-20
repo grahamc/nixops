@@ -118,20 +118,20 @@ def logged_exec(command, logger, check=True, capture_stdout=False, stdin=None,
             break
         if capture_stdout and process.stdout in r:
             data = process.stdout.read()
-            if data == "":
+            if data == b"":
                 fds.remove(process.stdout)
             else:
                 stdout += data
         if log_fd in r:
             data = log_fd.read()
-            if data == "":
+            if data == b"":
                 if not at_new_line:
                     logger.log_end("")
                 fds.remove(log_fd)
             else:
                 start = 0
                 while start < len(data):
-                    end = data.find('\n', start)
+                    end = data.find(b'\n', start)
                     if end == -1:
                         logger.log_start(data[start:])
                         at_new_line = False
@@ -310,8 +310,9 @@ class TeeStdout(StringIO):
         sys.stdout = self.stdout
     def write(self, data):
         self.stdout.write(data)
-        for l in data.split('\n'):
-            self.logger.info(l)
+        bytesified = data if isinstance(data, bytes) else data.encode('utf-8')
+        for l in bytesified.split(b'\n'):
+            self.logger.info(l.decode())
     def fileno(self):
         return self.stdout.fileno()
     def isatty(self):

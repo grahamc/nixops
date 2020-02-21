@@ -105,7 +105,7 @@ def logged_exec(command, logger, check=True, capture_stdout=False, stdin=None,
         make_non_blocking(fd)
 
     at_new_line = True
-    stdout = ""
+    stdout = b""
 
     while len(fds) > 0:
         # The timeout/poll is to deal with processes (like

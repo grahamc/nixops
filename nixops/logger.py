@@ -92,8 +92,10 @@ class Logger(object):
                 "warning: {0} (y/N) ".format(question),
                 outfile=self._log_file
             ))
+            self._log_file.flush()
             if self._auto_response is not None:
                 self._log_file.write("{0}\n".format(self._auto_response))
+                self._log_file.flush()
                 return self._auto_response == "y"
             response = sys.stdin.readline()
             if response == "":

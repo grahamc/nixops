@@ -153,7 +153,7 @@ def logged_exec(command, logger, check=True, capture_stdout=False, stdin=None,
         err = msg.format(command, logger.machine_name)
         raise CommandFailed(err, res)
 
-    return stdout if capture_stdout else res
+    return stdout.decode() if capture_stdout else res
 
 
 def generate_random_string(length=256):

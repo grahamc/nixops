@@ -65,5 +65,5 @@ class TestBackups(generic_deployment_test.GenericDeploymentTest):
 
     def check_command(self, command):
         self.depl.evaluate()
-        machine = list(self.depl.machines.values())[0]
+        machine = next(iter(self.depl.machines.values()))
         return machine.run_command(command)

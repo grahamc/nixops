@@ -29,6 +29,7 @@ class Logger(object):
                 self._log_file.write("\n")
                 self._last_log_prefix = None
             self._log_file.write(msg + "\n")
+            self._log_file.flush()
 
     def log_start(self, prefix, msg):
         with self._log_lock:
@@ -38,6 +39,7 @@ class Logger(object):
                 self._log_file.write(prefix)
             self._log_file.write(msg)
             self._last_log_prefix = prefix
+            self._log_file.flush()
 
     def log_end(self, prefix, msg):
         with self._log_lock:
@@ -50,6 +52,7 @@ class Logger(object):
                     return
                 self._log_file.write(prefix)
             self._log_file.write(msg + "\n")
+            self._log_file.flush()
 
     def get_logger_for(self, machine_name):
         """

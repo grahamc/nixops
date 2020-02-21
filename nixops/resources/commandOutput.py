@@ -70,7 +70,7 @@ class CommandOutputState(nixops.resources.ResourceState):
                 res = subprocess.check_output(
                         [defn.config['script']],
                         env=env,
-                        shell=True)
+                        shell=True).decode()
                 with self.depl._db:
                     self.value = res
                     self.state = self.UP

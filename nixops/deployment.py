@@ -404,7 +404,7 @@ class Deployment(object):
                  "-A", "nodes.{0}.config.{1}".format(machine_name, option_name)]
                 + (["--json"] if json else [])
                 + (["--xml"] if xml else []),
-                stderr=self.logger.log_file)
+                stderr=self.logger.log_file).decode()
         except subprocess.CalledProcessError:
             raise NixEvalError
 
@@ -622,7 +622,7 @@ class Deployment(object):
             ["nix-instantiate", "--find-file", "nixpkgs/nixos"] + self._nix_path_flags()).rstrip().decode()
         get_version_script = nixos_path + "/modules/installer/tools/get-version-suffix"
         if os.path.exists(nixos_path + "/.git") and os.path.exists(get_version_script):
-            self.nixos_version_suffix = subprocess.check_output(["/bin/sh", get_version_script] + self._nix_path_flags()).rstrip()
+            self.nixos_version_suffix = subprocess.check_output(["/bin/sh", get_version_script] + self._nix_path_flags()).rstrip().decode()
 
         phys_expr = self.tempdir + "/physical.nix"
         p = self.get_physical_spec()
@@ -669,7 +669,7 @@ class Deployment(object):
                  "-A", "machines", "-o", self.tempdir + "/configs"]
                 + (["--dry-run"] if dry_run else [])
                 + (["--repair"] if repair else []),
-                stderr=self.logger.log_file).rstrip()
+                stderr=self.logger.log_file).rstrip().decode()
         except subprocess.CalledProcessError:
             raise Exception("unable to build all machine configurations")
 

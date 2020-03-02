@@ -47,9 +47,9 @@ plugin$ nix-build
 - build result is NOT a working nixops
 
 nixops$ nix-build
-- runs mypy
-- runs tests
-- produces nixops which is functional, but without any plugins
+OK runs mypy
+OK runs tests
+OK produces nixops which is functional, but without any plugins
 
 nixops$ nix-build --arg plugin ../plugin
 - runs mypy checks both plugin and nixops

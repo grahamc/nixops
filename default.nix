@@ -18,6 +18,8 @@ in pythonPackages.buildPythonApplication rec {
   ];
 
   nativeBuildInputs = [
+    pkgs.libxslt
+    pkgs.docbook5_xsl
     (pythonPackages.mypy.overrideAttrs ({ propagatedBuildInputs, ... }: {
       propagatedBuildInputs = propagatedBuildInputs ++ [
         pythonPackages.lxml
@@ -31,6 +33,13 @@ in pythonPackages.buildPythonApplication rec {
     pythonPackages.pluggy
   ];
 
+  preBuild = ''
+    cp ${(import ./doc/manual { revision = nixopsSrc.rev; nixpkgs = pkgs.path; }).optionsDocBook} doc/manual/machine-options.xml
+    for i in scripts/nixops setup.py doc/manual/manual.xml; do
+      substituteInPlace $i --subst-var-by version ${version}
+    done
+  '';
+
   # For "nix-build --run-env".
   shellHook = ''
     export PYTHONPATH=$(pwd):$PYTHONPATH
@@ -40,6 +49,8 @@ in pythonPackages.buildPythonApplication rec {
   doCheck = true;
 
   postCheck = ''
+    mypy nixops
+
     # smoke test
     HOME=$TMPDIR $out/bin/nixops --version
   '';

@@ -11,6 +11,41 @@ machines in a network or cloud.
 * [Mailing list / Google group](https://groups.google.com/forum/#!forum/nixops-users)
 * [IRC - #nixos on freenode.net](irc://irc.freenode.net/#nixos)
 
+
+---
+
+```
+plugin$ nix-shell
+- mutable plugin source, immutable nixops src
+- mypy works
+- tests work
+- `nixops` works, using this plugin
+
+
+nixops$ nix-shell
+- no plugins
+- mutable nixops src
+- mypy works
+- tests work
+
+nixops$ nix-shell --arg plugin ../plugin
+- mutable plugin, mutable nixops
+- mypy checks both plugin and nixops
+- tests checks both plugin and nixops
+- `nixops` works including the plugin
+
+nixops$ nix-shell --arg plugins "[ ../plugin1 ../plugin2 ../plugin3 ]"
+- mutable plugins, mutable nixops
+- mypy checks all plugins and nixops
+- tests checks all plugins and nixops
+- `nixops` works including the plugins
+
+
+```
+
+
+---
+
 ## Developing
 
 To start developing on nixops, you can run:

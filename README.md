@@ -23,10 +23,10 @@ plugin$ nix-shell
 
 
 nixops$ nix-shell
-- no plugins
-- mutable nixops src
-- mypy works
-- tests work
+OK - no plugins
+OK - mutable nixops src
+OK - mypy works
+OK - tests work
 
 nixops$ nix-shell --arg plugin ../plugin
 - mutable plugin, mutable nixops

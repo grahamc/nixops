@@ -40,7 +40,26 @@ nixops$ nix-shell --arg plugins "[ ../plugin1 ../plugin2 ../plugin3 ]"
 - tests checks all plugins and nixops
 - `nixops` works including the plugins
 
+plugin$ nix-build
+- runs mypy
+- runs tests
+- produces artifact which can be passed in to a nixops build
+- build result is NOT a working nixops
 
+nixops$ nix-build
+- runs mypy
+- runs tests
+- produces nixops which is functional, but without any plugins
+
+nixops$ nix-build --arg plugin ../plugin
+- runs mypy checks both plugin and nixops
+- runs tests checks both plugin and nixops
+- build result is a `nixops` works including the plugin
+
+nixops$ nix-build --arg plugins "[ ../plugin1 ../plugin2 ../plugin3 ]"
+- runs mypy checks all plugins and nixops
+- runs tests checks all plugins and nixops
+- build result is a `nixops` works including the plugins
 ```
 
 

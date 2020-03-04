@@ -6,7 +6,7 @@ with pkgs.lib;
 let
   flagsExpr = import <nixpkgs/nixos/lib/qemu-flags.nix>;
   qemuFlags = if isAttrs flagsExpr then flagsExpr
-              else flagsExpr { inherit pkgs; };
+  else flagsExpr { inherit pkgs; };
   inherit (qemuFlags) qemuNICFlags;
 
   rescueISO = import ./rescue-image.nix { inherit pkgs; };
@@ -82,15 +82,17 @@ let
   '';
 
   env = "NIX_PATH=nixpkgs=${<nixpkgs>}"
-      + " HETZNER_ROBOT_USER=none HETZNER_ROBOT_PASS=none";
+  + " HETZNER_ROBOT_USER=none HETZNER_ROBOT_PASS=none";
 
   targetQemuFlags = targetId: let
-    mkDrive = file: "-drive " + (concatStringsSep "," [
-      "file='.$imgdir.'/${file}"
-      "if=virtio"
-      "cache=writeback"
-      "werror=report"
-    ]);
+    mkDrive = file: "-drive " + (
+      concatStringsSep "," [
+        "file='.$imgdir.'/${file}"
+        "if=virtio"
+        "cache=writeback"
+        "werror=report"
+      ]
+    );
     flags = [
       "-m 512"
       "-cpu kvm64"
@@ -98,19 +100,25 @@ let
       (mkDrive "harddisk${toString targetId}_2")
       (mkDrive "cacheimg${toString targetId}")
     ] ++ (qemuNICFlags 1 1 (builtins.add targetId 1));
-  in concatStringsSep " " flags;
+  in
+    concatStringsSep " " flags;
 
-in makeTest {
+in
+makeTest {
   name = "hetzner-backend";
 
   nodes.coordinator = {
     networking.firewall.enable = false;
-    environment.systemPackages = singleton (overrideDerivation nixops (o: {
-      postPatch = ''
-        sed -i -e 's/^TEST_MODE.*/TEST_MODE = True/' \
-          nixops/backends/hetzner.py
-      '';
-    }));
+    environment.systemPackages = singleton (
+      overrideDerivation nixops (
+        o: {
+          postPatch = ''
+            sed -i -e 's/^TEST_MODE.*/TEST_MODE = True/' \
+              nixops/backends/hetzner.py
+          '';
+        }
+      )
+    );
 
     # This is needed to make sure the coordinator can build the
     # deployment without network availability.
@@ -119,9 +127,16 @@ in makeTest {
       # store of the target machine.
       (import ../../nix/hetzner-bootstrap.nix)
       # ... and this is for other requirements for a basic deployment.
-      pkgs.stdenv pkgs.busybox pkgs.module_init_tools pkgs.grub2
-      pkgs.xfsprogs pkgs.btrfsProgs pkgs.docbook_xsl_ns
-      pkgs.docbook5 pkgs.ntp pkgs.perlPackages.ArchiveCpio
+      pkgs.stdenv
+      pkgs.busybox
+      pkgs.module_init_tools
+      pkgs.grub2
+      pkgs.xfsprogs
+      pkgs.btrfsProgs
+      pkgs.docbook_xsl_ns
+      pkgs.docbook5
+      pkgs.ntp
+      pkgs.perlPackages.ArchiveCpio
       (pkgs.libxslt.dev or pkgs.libxslt)
       (pkgs.libxml2.dev or pkgs.libxml2)
       # Firmware used in <nixpkgs/nixos/modules/installer/scan/not-detected.nix>

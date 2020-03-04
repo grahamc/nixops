@@ -43,27 +43,27 @@ let
               prefixLength = 24;
             } ];
             ${optionalString (n == 1) ''
-              environment.systemPackages = [ pkgs.vim ];
-            ''}
+      environment.systemPackages = [ pkgs.vim ];
+    ''}
             ${optionalString (n == 2 || n == 3) ''
-              services.httpd.enable = true;
-              services.httpd.adminAddr = "e.dolstra@tudelft.nl";
-            ''}
+      services.httpd.enable = true;
+      services.httpd.adminAddr = "e.dolstra@tudelft.nl";
+    ''}
             ${optionalString (n == 3) ''
-              services.httpd.extraModules = [
-                "proxy_balancer"
-                "lbmethod_byrequests"
-              ];
-              services.httpd.extraConfig =
-                "
-                  <Proxy balancer://cluster>
-                    Allow from all
-                    BalancerMember http://target2 retry=0
-                  </Proxy>
-                  ProxyPass        /foo/ balancer://cluster/
-                  ProxyPassReverse /foo/ balancer://cluster/
-                ";
-            ''}
+      services.httpd.extraModules = [
+        "proxy_balancer"
+        "lbmethod_byrequests"
+      ];
+      services.httpd.extraConfig =
+        "
+          <Proxy balancer://cluster>
+            Allow from all
+            BalancerMember http://target2 retry=0
+          </Proxy>
+          ProxyPass        /foo/ balancer://cluster/
+          ProxyPassReverse /foo/ balancer://cluster/
+        ";
+    ''}
           };
 
         target2 =
@@ -75,9 +75,9 @@ let
               prefixLength = 24;
             } ];
             ${optionalString (n == 3) ''
-              services.httpd.enable = true;
-              services.httpd.adminAddr = "e.dolstra@tudelft.nl";
-            ''}
+      services.httpd.enable = true;
+      services.httpd.adminAddr = "e.dolstra@tudelft.nl";
+    ''}
           };
       }
     '';
@@ -90,36 +90,44 @@ makeTest {
   name = "none-backend";
 
   nodes =
-    { coordinator =
+    {
+      coordinator =
         { config, pkgs, ... }:
-        { environment.systemPackages = [ nixops ];
-          # This is needed to make sure the coordinator can build the
-          # deployment without network availability.
-          system.extraDependencies = [
-            pkgs.stdenv pkgs.vim pkgs.apacheHttpd pkgs.busybox
-            pkgs.module_init_tools pkgs.perlPackages.ArchiveCpio
-          ];
-          networking.firewall.enable = false;
-          virtualisation.writableStore = true;
-        };
+          {
+            environment.systemPackages = [ nixops ];
+            # This is needed to make sure the coordinator can build the
+            # deployment without network availability.
+            system.extraDependencies = [
+              pkgs.stdenv
+              pkgs.vim
+              pkgs.apacheHttpd
+              pkgs.busybox
+              pkgs.module_init_tools
+              pkgs.perlPackages.ArchiveCpio
+            ];
+            networking.firewall.enable = false;
+            virtualisation.writableStore = true;
+          };
 
       target1 =
         { config, pkgs, ... }:
-        { services.openssh.enable = true;
-          virtualisation.memorySize = 512;
-          virtualisation.writableStore = true;
-          networking.firewall.enable = false;
-          users.extraUsers.root.openssh.authorizedKeys.keyFiles = [ ./id_test.pub ];
-        };
+          {
+            services.openssh.enable = true;
+            virtualisation.memorySize = 512;
+            virtualisation.writableStore = true;
+            networking.firewall.enable = false;
+            users.extraUsers.root.openssh.authorizedKeys.keyFiles = [ ./id_test.pub ];
+          };
 
       target2 =
         { config, pkgs, ... }:
-        { services.openssh.enable = true;
-          virtualisation.memorySize = 512;
-          virtualisation.writableStore = true;
-          networking.firewall.enable = false;
-          users.extraUsers.root.openssh.authorizedKeys.keyFiles = [ ./id_test.pub ];
-        };
+          {
+            services.openssh.enable = true;
+            virtualisation.memorySize = 512;
+            virtualisation.writableStore = true;
+            networking.firewall.enable = false;
+            users.extraUsers.root.openssh.authorizedKeys.keyFiles = [ ./id_test.pub ];
+          };
     };
 
   testScript = { nodes }:

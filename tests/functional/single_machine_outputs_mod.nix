@@ -1,5 +1,5 @@
-let 
-  lib = (import <nixpkgs>{}).lib;
+let
+  lib = (import <nixpkgs> {}).lib;
 in
 {
   resources = {

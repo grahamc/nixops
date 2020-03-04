@@ -7,7 +7,7 @@
       '';
     };
   };
-  machine = {resources, pkgs, ...} : {
+  machine = { resources, pkgs, ... }: {
     deployment.targetEnv = "libvirtd";
     environment.etc."test.txt".text = resources.commandOutput.thing.value;
   };

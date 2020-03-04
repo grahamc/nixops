@@ -73,32 +73,35 @@ let
 
   genFile = path: name: { type ? null, text ? "", ... }@attrs: with pkgs.lib;
     if type == null
-    then concatStrings (mapAttrsToList (genFile (path ++ [name])) attrs)
+    then concatStrings (mapAttrsToList (genFile (path ++ [ name ])) attrs)
     else ''
       ${optionalString (path != []) ''
-        mkdir -p "${concatStringsSep "/" path}"
-      ''}
-      cat > "${concatStringsSep "/" (path ++ [name])}" <<'EOF'
+      mkdir -p "${concatStringsSep "/" path}"
+    ''}
+      cat > "${concatStringsSep "/" (path ++ [ name ])}" <<'EOF'
       ${text}
       EOF
       ${optionalString (type == "exec") ''
-        chmod +x "${concatStringsSep "/" (path ++ [name])}"
-      ''}
+      chmod +x "${concatStringsSep "/" (path ++ [ name ])}"
+    ''}
     '';
 
-in pkgs.vmTools.runInLinuxImage (pkgs.stdenv.mkDerivation {
-  name = "backdoor.deb";
+in
+pkgs.vmTools.runInLinuxImage (
+  pkgs.stdenv.mkDerivation {
+    name = "backdoor.deb";
 
-  diskImage = diskImageFun {
-    extraPackages = [ "build-essential" "debhelper" "dh-systemd" ];
-  };
+    diskImage = diskImageFun {
+      extraPackages = [ "build-essential" "debhelper" "dh-systemd" ];
+    };
 
-  buildCommand = ''
-    mkdir backdoor
-    cd backdoor
-    ${with pkgs.lib; concatStrings (mapAttrsToList (genFile []) fileMap)}
-    dpkg-buildpackage -b
-    rmdir "$out" || :
-    mv -vT ../*.deb "$out" # */
-  '';
-})
+    buildCommand = ''
+      mkdir backdoor
+      cd backdoor
+      ${with pkgs.lib; concatStrings (mapAttrsToList (genFile []) fileMap)}
+      dpkg-buildpackage -b
+      rmdir "$out" || :
+      mv -vT ../*.deb "$out" # */
+    '';
+  }
+)

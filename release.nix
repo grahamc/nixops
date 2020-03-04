@@ -1,14 +1,15 @@
 { nixopsSrc ? { outPath = ./.; revCount = 0; shortRev = "abcdef"; rev = "HEAD"; }
 , officialRelease ? false
 , nixpkgs ? <nixpkgs>
-, p ? (p: [ ])
+, p ? (p: [])
 }:
 
 let
   pkgs = import nixpkgs { config = {}; overlays = []; };
   version = "1.8" + (if officialRelease then "" else "pre${toString nixopsSrc.revCount}_${nixopsSrc.shortRev}");
 
-in rec {
+in
+rec {
 
   allPlugins = let
     plugins = let
@@ -19,10 +20,13 @@ in rec {
           rev = "v${v.version}";
         };
       srcDrv = v: (fetch v) + "/release.nix";
-    in self: let
-      rawPlugins = (builtins.mapAttrs (n: v: self.callPackage (srcDrv allPluginVers.${n}) {}) allPluginVers);
-    in rawPlugins // { inherit nixpkgs; nixops = buildWithNoPlugins; };
-  in pkgs.lib.makeScope pkgs.newScope plugins;
+    in
+      self: let
+        rawPlugins = (builtins.mapAttrs (n: v: self.callPackage (srcDrv allPluginVers.${n}) {}) allPluginVers);
+      in
+        rawPlugins // { inherit nixpkgs; nixops = buildWithNoPlugins; };
+  in
+    pkgs.lib.makeScope pkgs.newScope plugins;
 
   tarball = pkgs.releaseTools.sourceTarball {
     name = "nixops-tarball";
@@ -66,68 +70,75 @@ in rec {
 
   build = buildWithPlugins p;
   buildWithNoPlugins = buildWithPlugins (_: []);
-  buildWithPlugins = pluginSet: pkgs.lib.genAttrs [ "x86_64-linux" "i686-linux" "x86_64-darwin" ] (system:
-    let
-      pkgs = import nixpkgs { inherit system; };
-      pythonPackages = pkgs.python37Packages;
-    in pythonPackages.buildPythonApplication rec {
-      name = "nixops-${version}";
+  buildWithPlugins = pluginSet: pkgs.lib.genAttrs [ "x86_64-linux" "i686-linux" "x86_64-darwin" ] (
+    system:
+      let
+        pkgs = import nixpkgs { inherit system; };
+        pythonPackages = pkgs.python37Packages;
+      in
+        pythonPackages.buildPythonApplication rec {
+          name = "nixops-${version}";
 
-      src = "${tarball}/tarballs/*.tar.bz2";
+          src = "${tarball}/tarballs/*.tar.bz2";
 
-      buildInputs = [ pythonPackages.nose pythonPackages.coverage ];
+          buildInputs = [ pythonPackages.nose pythonPackages.coverage ];
 
-      nativeBuildInputs = [
-        (pythonPackages.mypy.overrideAttrs ({ propagatedBuildInputs, ... }: {
-          propagatedBuildInputs = propagatedBuildInputs ++ [
-            pythonPackages.lxml
+          nativeBuildInputs = [
+            (
+              pythonPackages.mypy.overrideAttrs (
+                { propagatedBuildInputs, ... }: {
+                  propagatedBuildInputs = propagatedBuildInputs ++ [
+                    pythonPackages.lxml
+                  ];
+                }
+              )
+            )
+            pythonPackages.black
+            pkgs.nixpkgs-fmt
           ];
-        }))
-        pythonPackages.black
-        pkgs.nixpkgs-fmt
-      ];
 
-        propagatedBuildInputs = [
-          pythonPackages.prettytable
-          pythonPackages.pluggy
-        ] ++ pkgs.lib.traceValFn
-           (x: "Using plugins: " + builtins.toJSON x)
-           (map (d: d.build.${system}) (pluginSet allPlugins));
+          propagatedBuildInputs = [
+            pythonPackages.prettytable
+            pythonPackages.pluggy
+          ] ++ pkgs.lib.traceValFn
+            (x: "Using plugins: " + builtins.toJSON x)
+            (map (d: d.build.${system}) (pluginSet allPlugins));
 
-      # For "nix-build --run-env".
-      shellHook = ''
-        export PYTHONPATH=$(pwd):$PYTHONPATH
-        export PATH=$(pwd)/scripts:${pkgs.openssh}/bin:$PATH
-      '';
+          # For "nix-build --run-env".
+          shellHook = ''
+            export PYTHONPATH=$(pwd):$PYTHONPATH
+            export PATH=$(pwd)/scripts:${pkgs.openssh}/bin:$PATH
+          '';
 
-      doCheck = true;
+          doCheck = true;
 
-      postCheck = ''
-        # smoke test
-        HOME=$TMPDIR $out/bin/nixops --version
-      '';
+          postCheck = ''
+            # smoke test
+            HOME=$TMPDIR $out/bin/nixops --version
+          '';
 
-      # Needed by libcloud during tests
-      SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
+          # Needed by libcloud during tests
+          SSL_CERT_FILE = "${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
 
-      # Add openssh to nixops' PATH. On some platforms, e.g. CentOS and RHEL
-      # the version of openssh is causing errors when have big networks (40+)
-      makeWrapperArgs = ["--prefix" "PATH" ":" "${pkgs.openssh}/bin" "--set" "PYTHONPATH" ":"];
+          # Add openssh to nixops' PATH. On some platforms, e.g. CentOS and RHEL
+          # the version of openssh is causing errors when have big networks (40+)
+          makeWrapperArgs = [ "--prefix" "PATH" ":" "${pkgs.openssh}/bin" "--set" "PYTHONPATH" ":" ];
 
-      postInstall =
-        ''
-          # Backward compatibility symlink.
-          ln -s nixops $out/bin/charon
+          postInstall =
+            ''
+              # Backward compatibility symlink.
+              ln -s nixops $out/bin/charon
 
-          make -C doc/manual install \
-            docdir=$out/share/doc/nixops mandir=$out/share/man
+              make -C doc/manual install \
+                docdir=$out/share/doc/nixops mandir=$out/share/man
 
-          mkdir -p $out/share/nix/nixops
-          cp -av nix/* $out/share/nix/nixops
-        '';
+              mkdir -p $out/share/nix/nixops
+              cp -av nix/* $out/share/nix/nixops
+            '';
 
-      meta.description = "Nix package for ${pkgs.stdenv.system}";
-    });
+          meta.description = "Nix package for ${pkgs.stdenv.system}";
+        }
+  );
 
   /*
   tests.none_backend = (import ./tests/none-backend.nix {

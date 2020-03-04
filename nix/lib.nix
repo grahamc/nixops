@@ -10,6 +10,6 @@ with lib;
     merge = mergeOneOption;
   };
 
-  shorten_uuid = uuid: replaceChars ["-"] [""] uuid;
+  shorten_uuid = uuid: replaceChars [ "-" ] [ "" ] uuid;
 
 }

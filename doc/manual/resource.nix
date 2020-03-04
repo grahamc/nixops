@@ -9,7 +9,10 @@ let
 
   backwardsCompat = import ./compat.nix { inherit pkgs; };
 
-in ((pkgs.nixosOptionsDoc or backwardsCompat) {
-  inherit (systemModule) options;
-  inherit revision;
-}).optionsDocBook
+in
+(
+  (pkgs.nixosOptionsDoc or backwardsCompat) {
+    inherit (systemModule) options;
+    inherit revision;
+  }
+).optionsDocBook

@@ -6,18 +6,18 @@ in
 
   resources.rdsDbInstances.test-rds-instance =
     { resources, ... }:
-    {
-      inherit region;
-      id = "myOtherDatabaseIsAFilesystem";
-      instanceClass = "db.r3.large";
-      allocatedStorage = 30;
-      masterUsername = "administrator";
-      masterPassword = "testing123";
-      port = 5432;
-      engine = "postgres";
-      dbName = "helloDarling";
-      securityGroups = [ resources.rdsDbSecurityGroups.test-rds-sg ];
-    };
+      {
+        inherit region;
+        id = "myOtherDatabaseIsAFilesystem";
+        instanceClass = "db.r3.large";
+        allocatedStorage = 30;
+        masterUsername = "administrator";
+        masterPassword = "testing123";
+        port = 5432;
+        engine = "postgres";
+        dbName = "helloDarling";
+        securityGroups = [ resources.rdsDbSecurityGroups.test-rds-sg ];
+      };
 
   resources.rdsDbSecurityGroups.test-rds-sg =
     {

@@ -1,6 +1,6 @@
 {
   machine =
-    { resources, ...}:  {
+    { resources, ... }: {
       deployment.targetEnv = "azure";
       deployment.azure = {
         location = "westus";

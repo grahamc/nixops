@@ -8,7 +8,9 @@ with lib;
   boot.initrd.kernelModules = [ "virtio_blk" "virtio_pci" ];
 
   fileSystems =
-    [ { mountPoint = "/";
+    [
+      {
+        mountPoint = "/";
         label = "nixos";
       }
     ];

@@ -16,7 +16,7 @@ with lib;
         <warning>Warning: This uses shell features and is potentially dangerous.</warning>
         Environment variables: 
         <envar>$out</envar> is a temp directory available for use.
-        '';
+      '';
     };
 
     value = mkOption {

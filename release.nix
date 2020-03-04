@@ -84,6 +84,7 @@ in rec {
           ];
         }))
         pythonPackages.black
+        pkgs.nixpkgs-fmt
       ];
 
         propagatedBuildInputs = [

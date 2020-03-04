@@ -4,5 +4,6 @@ before_script:
 script:
   - nix-shell --run "mypy nixops"
   - nix-shell --run "black . --check --diff"
+  - nix-shell --run "nixpkgs-fmt --check . "
   - ./dev-shell --run "./coverage-tests.py -a '!libvirtd,!gce,!ec2,!azure' -v"
   - nix-build --quiet release.nix -A build.x86_64-linux -I nixpkgs=channel:nixos-19.09

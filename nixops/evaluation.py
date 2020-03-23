@@ -5,11 +5,18 @@ import json
 
 
 @dataclass
-class NetworkEval:
+class GenericStorageConfig:
 
     description: str = "Unnamed NixOps network"
     enableRollback: bool = False
-    enableState: bool = True
+
+
+@dataclass
+class NetworkEval:
+    storage: GenericStorageConfig
+    description: str = "Unnamed NixOps network"
+    enableRollback: bool = False
+    enableState: bool = False
 
 
 def _eval_attr(

@@ -884,43 +884,45 @@ def op_scp(args):
 
 
 def op_mount(args):
-    depl = open_deployment(args)
-    (username, rest) = parse_machine(args.machine)
-    (machine, remote_path) = (rest, "/") if rest.find(":") == -1 else rest.split(":", 1)
-    m = depl.machines.get(machine)
-    if not m:
-        raise Exception("unknown machine ‘{0}’".format(machine))
-    ssh_name = m.get_ssh_name()
+    with deployment(args) as depl:
+        (username, rest) = parse_machine(args.machine)
+        (machine, remote_path) = (
+            (rest, "/") if rest.find(":") == -1 else rest.split(":", 1)
+        )
+        m = depl.machines.get(machine)
+        if not m:
+            raise Exception("unknown machine ‘{0}’".format(machine))
+        ssh_name = m.get_ssh_name()
 
-    flags = m.get_ssh_flags()
-    new_flags = []
-    n = 0
-    while n < len(flags):
-        if flags[n] == "-i":
-            new_flags.extend(["-o", "IdentityFile=" + flags[n + 1]])
-            n = n + 2
-        elif flags[n] == "-p":
-            new_flags.extend(["-p", flags[n + 1]])
-            n = n + 2
-        elif flags[n] == "-o":
-            new_flags.extend(["-o", flags[n + 1]])
-            n = n + 2
-        else:
-            raise Exception(
-                "don't know how to pass SSH flag ‘{0}’ to sshfs".format(flags[n])
-            )
+        flags = m.get_ssh_flags()
+        new_flags = []
+        n = 0
+        while n < len(flags):
+            if flags[n] == "-i":
+                new_flags.extend(["-o", "IdentityFile=" + flags[n + 1]])
+                n = n + 2
+            elif flags[n] == "-p":
+                new_flags.extend(["-p", flags[n + 1]])
+                n = n + 2
+            elif flags[n] == "-o":
+                new_flags.extend(["-o", flags[n + 1]])
+                n = n + 2
+            else:
+                raise Exception(
+                    "don't know how to pass SSH flag ‘{0}’ to sshfs".format(flags[n])
+                )
 
-    for o in args.sshfs_option or []:
-        new_flags.extend(["-o", o])
+        for o in args.sshfs_option or []:
+            new_flags.extend(["-o", o])
 
-    # Note: sshfs will go into the background when it has finished
-    # setting up, so we can safely delete the SSH identity file
-    # afterwards.
-    res = subprocess.call(
-        ["sshfs", username + "@" + ssh_name + ":" + remote_path, args.destination]
-        + new_flags
-    )
-    sys.exit(res)
+        # Note: sshfs will go into the background when it has finished
+        # setting up, so we can safely delete the SSH identity file
+        # afterwards.
+        res = subprocess.call(
+            ["sshfs", username + "@" + ssh_name + ":" + remote_path, args.destination]
+            + new_flags
+        )
+        sys.exit(res)
 
 
 def op_show_option(args):
@@ -949,12 +951,12 @@ def with_rollback_enabled(args):
 
 
 def op_list_generations(args):
-    depl = check_rollback_enabled(args)
-    if (
-        subprocess.call(["nix-env", "-p", depl.get_profile(), "--list-generations"])
-        != 0
-    ):
-        raise Exception("nix-env --list-generations failed")
+    with with_rollback_enabled(args) as depl:
+        if (
+            subprocess.call(["nix-env", "-p", depl.get_profile(), "--list-generations"])
+            != 0
+        ):
+            raise Exception("nix-env --list-generations failed")
 
 
 def op_delete_generation(args):

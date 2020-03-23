@@ -771,6 +771,7 @@ def op_dump_nix_paths(args):
 
     paths: List[str] = []
 
+    raise NotImplementedError
     for depl in one_or_all(args):
         paths.extend(nix_paths(depl))
 

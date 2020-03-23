@@ -672,13 +672,13 @@ def op_set_args(args):
 
 
 def op_destroy(args):
-    raise NotImplementedError
-    for depl in one_or_all(args):
-        if args.confirm:
-            depl.logger.set_autoresponse("y")
-        depl.destroy_resources(
-            include=args.include or [], exclude=args.exclude or [], wipe=args.wipe
-        )
+    with one_or_all(args) as depls:
+        for depl in depls:
+            if args.confirm:
+                depl.logger.set_autoresponse("y")
+            depl.destroy_resources(
+                include=args.include or [], exclude=args.exclude or [], wipe=args.wipe
+            )
 
 
 def op_reboot(args):

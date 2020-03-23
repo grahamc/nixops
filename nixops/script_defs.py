@@ -927,13 +927,14 @@ def op_show_option(args):
     )
 
 
-def check_rollback_enabled(args):
-    depl = open_deployment(args)
-    if not depl.rollback_enabled:
-        raise Exception(
-            "rollback is not enabled for this network; please set ‘network.enableRollback’ to ‘true’ and redeploy"
-        )
-    return depl
+@contextlib.contextmanager
+def with_rollback_enabled(args):
+    with deployment(args) as depl:
+        if not depl.rollback_enabled:
+            raise Exception(
+                "rollback is not enabled for this network; please set ‘network.enableRollback’ to ‘true’ and redeploy"
+            )
+        yield depl
 
 
 def op_list_generations(args):

@@ -6,6 +6,8 @@ from nixops.parallel import MultipleExceptions, run_tasks
 from nixops.storage import StorageBackend
 import pluggy
 
+import contextlib
+from tempfile import TemporaryDirectory
 import nixops.statefile
 import prettytable
 from argparse import ArgumentParser, _SubParsersAction, Namespace
@@ -52,6 +54,38 @@ for backends in pm.hook.register_backends():
                     f"Two plugins tried to provide the '{name}' storage backend."
                 )
             )
+
+
+@contextlib.contextmanager
+def network_state(args: Namespace) -> Generator[nixops.statefile.StateFile, None, None]:
+    network_file: str = args.network_file
+    network = eval_network([network_file])
+    storage_class: Optional[Type[StorageBackend]] = storage_backends.get(
+        network.storage_provider
+    )
+    if storage_class is None:
+        sys.stderr.write(
+            nixops.util.ansi_warn(
+                f"The network requires the '{network.storage_provider}' state provider, "
+                "but no plugin provides it.\n"
+            )
+        )
+        raise Exception("Missing storage provider plugin.")
+
+    storage: StorageBackend = storage_class(network.storage_configuration)
+
+    with TemporaryDirectory("nixops") as statedir:
+        statefile = statedir + "/state.nixops"
+        storage.fetchToFile(statefile)
+
+        try:
+            state = _create_state(statefile)
+
+            yield state
+        except Exception:
+            pass
+        finally:
+            storage.uploadFromFile(statefile)
 
 
 @lru_cache()

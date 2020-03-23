@@ -780,6 +780,7 @@ def op_dump_nix_paths(args):
 
 
 def op_export(args):
+    raise NotImplementedError
     res = {}
     for depl in one_or_all(args):
         res[depl.uuid] = depl.export()

@@ -838,6 +838,7 @@ def op_ssh(args):
 
 
 def op_ssh_for_each(args):
+    raise NotImplementedError
     results: List[Optional[int]] = []
     for depl in one_or_all(args):
 

@@ -242,6 +242,7 @@ def op_clone(args):
 
 
 def op_delete(args):
+    raise NotImplementedError
     for depl in one_or_all(args):
         depl.delete(force=args.force or False)
 

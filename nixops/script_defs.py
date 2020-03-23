@@ -672,6 +672,7 @@ def op_set_args(args):
 
 
 def op_destroy(args):
+    raise NotImplementedError
     for depl in one_or_all(args):
         if args.confirm:
             depl.logger.set_autoresponse("y")

@@ -960,20 +960,20 @@ def op_list_generations(args):
 
 
 def op_delete_generation(args):
-    depl = check_rollback_enabled(args)
-    if (
-        subprocess.call(
-            [
-                "nix-env",
-                "-p",
-                depl.get_profile(),
-                "--delete-generations",
-                str(args.generation),
-            ]
-        )
-        != 0
-    ):
-        raise Exception("nix-env --delete-generations failed")
+    with with_rollback_enabled(args) as depl:
+        if (
+            subprocess.call(
+                [
+                    "nix-env",
+                    "-p",
+                    depl.get_profile(),
+                    "--delete-generations",
+                    str(args.generation),
+                ]
+            )
+            != 0
+        ):
+            raise Exception("nix-env --delete-generations failed")
 
 
 def op_rollback(args):

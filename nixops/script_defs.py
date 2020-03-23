@@ -233,6 +233,7 @@ def op_modify(args):
 
 
 def op_clone(args):
+    raise NotImplementedError
     depl = open_deployment(args)
     depl2 = depl.clone()
     sys.stderr.write("created deployment ‘{0}’\n".format(depl2.uuid))

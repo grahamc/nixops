@@ -788,6 +788,7 @@ def op_export(args):
 
 
 def op_import(args):
+    raise NotImplementedError
     sf = _create_state(args.state_file)
     existing = set(sf.query_deployments())
 

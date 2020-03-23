@@ -80,6 +80,7 @@ in rec {
         (pythonPackages.mypy.overrideAttrs ({ propagatedBuildInputs, ... }: {
           propagatedBuildInputs = propagatedBuildInputs ++ [
             pythonPackages.lxml
+            pythonPackages.typing-extensions
           ];
         }))
         pythonPackages.black

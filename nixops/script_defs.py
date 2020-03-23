@@ -3,6 +3,7 @@
 from nixops import deployment
 from nixops.nix_expr import py2nix
 from nixops.parallel import MultipleExceptions, run_tasks
+from nixops.storage import StorageBackend
 import pluggy
 
 import nixops.statefile
@@ -22,21 +23,35 @@ import logging.handlers
 import syslog
 import json
 import pipes
-from typing import Tuple, List, Optional, Union, Any
+from typing import Dict, Tuple, List, Optional, Union, Any
 from datetime import datetime
 from pprint import pprint
 import importlib
 from functools import lru_cache
 
+import nixops.plugin
 from nixops.plugins import get_plugin_manager
 from nixops.evaluation import eval_network
 
 
 pm = get_plugin_manager()
+pm.register(nixops.plugin)
 [
     [importlib.import_module(mod) for mod in pluginimports]
     for pluginimports in pm.hook.load()
 ]
+
+storage_backends: Dict[str, StorageBackend] = {}
+for backends in pm.hook.register_backends():
+    for name, backend in backends.items():
+        if name not in storage_backends:
+            storage_backends[name] = backend
+        else:
+            sys.stderr.write(
+                nixops.util.ansi_warn(
+                    f"Two plugins tried to provide the '{name}' storage backend."
+                )
+            )
 
 
 @lru_cache()

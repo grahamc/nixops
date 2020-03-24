@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Dict, Any, Type
 from typing_extensions import Protocol, TypedDict
 
@@ -27,6 +28,9 @@ class StorageBackend(Protocol):
     # arguments later.
     def fetchToFile(self, path: str, **kwargs) -> bool:
         raise NotImplementedError
+
+    def onOpen(self, sf: nixops.statefile.StateFile, **kwargs):
+        pass
 
     # uploadFromFile: upload the new state file and release any locks
     # Note: no arguments will be passed over kwargs. Making it part of

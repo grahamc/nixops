@@ -86,6 +86,7 @@ def network_state(args: Namespace) -> Generator[nixops.statefile.StateFile, None
 
         try:
             state = _create_state(statefile)
+            storage.onOpen(state)
 
             yield state
         except Exception:

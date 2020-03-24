@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from nixops import deployment
 from nixops.nix_expr import py2nix
 from nixops.parallel import MultipleExceptions, run_tasks
 from nixops.storage import StorageBackend
@@ -25,7 +24,7 @@ import logging.handlers
 import syslog
 import json
 import pipes
-from typing import Dict, Tuple, List, Optional, Union, Any, Type
+from typing import Dict, Tuple, List, Optional, Union, Any, Generator, Type
 from datetime import datetime
 from pprint import pprint
 import importlib
@@ -54,6 +53,13 @@ for backends in pm.hook.register_backends():
                     f"Two plugins tried to provide the '{name}' storage backend."
                 )
             )
+
+
+@contextlib.contextmanager
+def deployment(args: Namespace) -> Generator[nixops.deployment.Deployment, None, None]:
+    with network_state(args) as sf:
+        depl = open_deployment(sf, args)
+        yield depl
 
 
 @contextlib.contextmanager
@@ -130,7 +136,7 @@ def one_or_all(
         if args.all:
             yield sf.get_all_deployments()
         else:
-            yield [open_deployment(args)]
+            yield [open_deployment(sf, args)]
 
 
 def op_list_deployments(args):
@@ -157,8 +163,7 @@ def op_list_deployments(args):
     print(tbl)
 
 
-def open_deployment(args):
-    sf = _create_state(args.state_file)
+def open_deployment(sf: nixops.statefile.StateFile, args: Namespace):
     depl = sf.open_deployment(uuid=args.deployment)
 
     depl.extra_nix_path = sum(args.nix_path or [], [])

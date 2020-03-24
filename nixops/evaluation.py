@@ -6,9 +6,8 @@ import json
 
 @dataclass
 class GenericStorageConfig:
-
-    description: str = "Unnamed NixOps network"
-    enableRollback: bool = False
+    provider: str
+    configuration: typing.Dict[typing.Any, typing.Any]
 
 
 @dataclass
@@ -16,7 +15,6 @@ class NetworkEval:
     storage: GenericStorageConfig
     description: str = "Unnamed NixOps network"
     enableRollback: bool = False
-    enableState: bool = False
 
 
 def _eval_attr(

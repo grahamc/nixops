@@ -92,6 +92,7 @@ def network_state(args: Namespace) -> Generator[nixops.statefile.StateFile, None
         except Exception:
             pass
         finally:
+            state.close()
             storage.uploadFromFile(statefile)
 
 

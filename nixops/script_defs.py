@@ -67,7 +67,7 @@ def network_state(args: Namespace) -> Generator[nixops.statefile.StateFile, None
     network_file: str = args.network_file
     network = eval_network([network_file])
     storage_class: Optional[Type[StorageBackend]] = storage_backends.get(
-        network.storage_provider
+        network.storage.provider
     )
     if storage_class is None:
         sys.stderr.write(
@@ -78,7 +78,7 @@ def network_state(args: Namespace) -> Generator[nixops.statefile.StateFile, None
         )
         raise Exception("Missing storage provider plugin.")
 
-    storage: StorageBackend = storage_class(network.storage_configuration)
+    storage: StorageBackend = storage_class(network.storage.configuration)
 
     with TemporaryDirectory("nixops") as statedir:
         statefile = statedir + "/state.nixops"

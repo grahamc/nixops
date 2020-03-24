@@ -23,7 +23,7 @@ import logging.handlers
 import syslog
 import json
 import pipes
-from typing import Dict, Tuple, List, Optional, Union, Any
+from typing import Dict, Tuple, List, Optional, Union, Any, Type
 from datetime import datetime
 from pprint import pprint
 import importlib
@@ -41,7 +41,7 @@ pm.register(nixops.plugin)
     for pluginimports in pm.hook.load()
 ]
 
-storage_backends: Dict[str, StorageBackend] = {}
+storage_backends: Dict[str, Type[StorageBackend]] = {}
 for backends in pm.hook.register_backends():
     for name, backend in backends.items():
         if name not in storage_backends:

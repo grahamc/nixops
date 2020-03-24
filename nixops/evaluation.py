@@ -48,4 +48,21 @@ def _eval_attr(
 
 def eval_network(nix_exprs: typing.List[str]) -> NetworkEval:
     result = _eval_attr("network", nix_exprs)
+
+    storage = result.get("storage")
+    if storage is None:
+        raise Exception("Missing property: network.storage must be configured.")
+    if len(storage.keys()) > 1:
+        raise Exception(
+            "Invalid property: network.storage can only have one defined storage backend."
+        )
+
+    key = list(storage.keys()).pop()
+    if key is None:
+        raise Exception(
+            "Missing property: network.storage has no defined storage backend."
+        )
+
+    result["storage"] = GenericStorageConfig(provider=key, configuration=storage[key])
+
     return NetworkEval(**result)

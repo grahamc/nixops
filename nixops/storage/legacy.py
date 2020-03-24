@@ -1,4 +1,5 @@
 from nixops.storage import StorageArgDescriptions, StorageArgValues
+import nixops.statefile
 import sys
 import os
 
@@ -17,6 +18,9 @@ class LegacyBackend:
     # arguments later.
     def fetchToFile(self, path: str, **kwargs):
         os.symlink(self.state_location(), path)
+
+    def onOpen(self, sf: nixops.statefile.StateFile, **kwargs):
+        pass
 
     def state_location(self) -> str:
         env_override = os.environ.get("NIXOPS_STATE", os.environ.get("CHARON_STATE"))

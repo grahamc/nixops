@@ -81,6 +81,7 @@ in rec {
           propagatedBuildInputs = propagatedBuildInputs ++ [
             pythonPackages.lxml
             pythonPackages.typing-extensions
+            pythonPackages.boto3
           ];
         }))
         pythonPackages.black

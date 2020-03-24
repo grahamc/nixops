@@ -72,7 +72,7 @@ def network_state(args: Namespace) -> Generator[nixops.statefile.StateFile, None
     if storage_class is None:
         sys.stderr.write(
             nixops.util.ansi_warn(
-                f"The network requires the '{network.storage_provider}' state provider, "
+                f"The network requires the '{network.storage.provider}' state provider, "
                 "but no plugin provides it.\n"
             )
         )

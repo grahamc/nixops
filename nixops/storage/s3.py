@@ -20,7 +20,7 @@ class S3Backend:
         self.bucket = args["bucket"]
         self.key = args["key"]
         self.region = args["region"]
-        self.profile = args["profile"]
+        self.profile = args.get("profile")
         self.dynamodb_table = args["dynamodb_table"]
         self.s3_endpoint = args.get("s3_endpoint")
         self.kms_keyid = args.get("kms_keyid")

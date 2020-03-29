@@ -20,11 +20,15 @@ class S3Backend:
         self.bucket: str = args["bucket"]
         self.key: str = args["key"]
         self.region: str = args["region"]
-        self.profile: Optional[str] = args.get("profile")
         self.dynamodb_table: Optional[str] = args.get("dynamodb_table")
         self.s3_endpoint: Optional[str] = args.get("s3_endpoint")
         self.kms_keyid: Optional[str] = args.get("kms_keyid")
-        self.aws = boto3.Session(region_name=self.region, profile_name=self.profile)
+
+        profile: Optional[str] = args.get("profile")
+        if self.region is not None:
+            self.aws = boto3.Session(region_name=self.region, profile_name=profile)
+        else:
+            self.aws = boto3.Session(region_name=self.region)
 
     # fetchToFile: acquire a lock and download the state file to
     # the local disk. Note: no arguments will be passed over kwargs.
@@ -34,14 +38,14 @@ class S3Backend:
         self.lock(path)
         try:
             with open(path, "wb") as f:
-                self.aws.client("s3").download_fileobj(self.bucket, self.key, f)
+                self.s3().download_fileobj(self.bucket, self.key, f)
             print("Fetched!")
         except ClientError as e:
             from pprint import pprint
 
             pprint(e)
             if e.response["Error"]["Code"] == "404":
-                self.aws.client("s3").put_object(
+                self.s3().put_object(
                     Bucket=self.bucket, Key=self.key, Body=b"", **self.encargs()
                 )
 
@@ -53,14 +57,15 @@ class S3Backend:
     # the type definition allows adding new arguments later.
     def uploadFromFile(self, path: str, **kwargs) -> None:
         with open(path, "rb") as f:
-            self.aws.client("s3").upload_fileobj(
-                f, self.bucket, self.key, ExtraArgs=self.encargs()
-            )
+            self.s3().upload_fileobj(f, self.bucket, self.key, ExtraArgs=self.encargs())
 
         self.unlock(path)
 
-    def s3(self) -> None:
-        self.aws.client("s3", endpoint_url=self.s3_endpoint)
+    def s3(self):
+        if self.s3_endpoint is None:
+            return self.aws.client("s3")
+        else:
+            return self.aws.client("s3", endpoint_url=self.s3_endpoint)
 
     def encargs(self) -> Dict[str, str]:
         if self.kms_keyid is not None:

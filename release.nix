@@ -88,6 +88,8 @@ in rec {
         propagatedBuildInputs = [
           pythonPackages.prettytable
           pythonPackages.pluggy
+          pythonPackages.typing-extensions
+          pythonPackages.boto3
         ] ++ pkgs.lib.traceValFn
            (x: "Using plugins: " + builtins.toJSON x)
            (map (d: d.build.${system}) (pluginSet allPlugins));

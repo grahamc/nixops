@@ -2,6 +2,7 @@
 
 from nixops.nix_expr import py2nix
 from nixops.parallel import MultipleExceptions, run_tasks
+from nixops.storage import StorageBackend
 import pluggy
 
 import contextlib
@@ -21,36 +22,75 @@ import logging
 import logging.handlers
 import syslog
 import json
+from tempfile import TemporaryDirectory
 import pipes
-from typing import Tuple, List, Optional, Union, Any, Generator
+from typing import Tuple, List, Optional, Union, Any, Generator, Dict, Type
 from datetime import datetime
 from pprint import pprint
 import importlib
 
+import nixops.plugin
 from nixops.plugins import get_plugin_manager
+from nixops.evaluation import eval_network
 
 
 pm = get_plugin_manager()
+pm.register(nixops.plugin)
 [
     [importlib.import_module(mod) for mod in pluginimports]
     for pluginimports in pm.hook.load()
 ]
+
+storage_backends: Dict[str, Type[StorageBackend]] = {}
+for backends in pm.hook.register_backends():
+    for name, backend in backends.items():
+        if name not in storage_backends:
+            storage_backends[name] = backend
+        else:
+            sys.stderr.write(
+                nixops.util.ansi_warn(
+                    f"Two plugins tried to provide the '{name}' storage backend."
+                )
+            )
 
 
 @contextlib.contextmanager
 def deployment(args: Namespace) -> Generator[nixops.deployment.Deployment, None, None]:
     with network_state(args) as sf:
         depl = open_deployment(sf, args)
+        depl.nix_exprs = [os.path.abspath(args.network_file)]
         yield depl
 
 
 @contextlib.contextmanager
 def network_state(args: Namespace) -> Generator[nixops.statefile.StateFile, None, None]:
-    state = nixops.statefile.StateFile(args.state_file)
-    try:
-        yield state
-    finally:
-        state.close()
+    network_file: str = args.network_file
+    network = eval_network([network_file])
+    storage_class: Optional[Type[StorageBackend]] = storage_backends.get(
+        network.storage.provider
+    )
+    if storage_class is None:
+        sys.stderr.write(
+            nixops.util.ansi_warn(
+                f"The network requires the '{network.storage.provider}' state provider, "
+                "but no plugin provides it.\n"
+            )
+        )
+        raise Exception("Missing storage provider plugin.")
+
+    storage: StorageBackend = storage_class(network.storage.configuration)
+
+    with TemporaryDirectory("nixops") as statedir:
+        statefile = statedir + "/state.nixops"
+        storage.fetchToFile(statefile)
+        state = nixops.statefile.StateFile(statefile)
+        try:
+            storage.onOpen(state)
+
+            yield state
+        finally:
+            state.close()
+            storage.uploadFromFile(statefile)
 
 
 def op_list_plugins(args):
@@ -167,8 +207,15 @@ def op_create(args):
         depl = sf.create_deployment()
         sys.stderr.write("created deployment ‘{0}’\n".format(depl.uuid))
         modify_deployment(args, depl)
-        if args.name or args.deployment:
-            set_name(depl, args.name or args.deployment)
+
+        # When deployment is created without state "name" does not exist
+        name = args.deployment
+        if "name" in args:
+            name = args.name or args.deployment
+
+        if name:
+            set_name(depl, name)
+
         sys.stdout.write(depl.uuid + "\n")
 
 
@@ -1021,12 +1068,11 @@ def add_subparser(
 ) -> ArgumentParser:
     subparser = subparsers.add_parser(name, help=help)
     subparser.add_argument(
-        "--state",
-        "-s",
-        dest="state_file",
+        "--network",
+        dest="network_file",
         metavar="FILE",
-        default=nixops.statefile.get_default_state_file(),
-        help="path to state file",
+        default=f"{os.getcwd()}/network.nix",
+        help="path to a network.nix",
     )
     subparser.add_argument(
         "--deployment",
@@ -1106,7 +1152,7 @@ def add_subparser(
     return subparser
 
 
-def add_common_modify_options(subparser: ArgumentParser):
+def add_common_modify_options(subparser: ArgumentParser) -> None:
     subparser.add_argument(
         "nix_exprs",
         nargs="*",
@@ -1123,7 +1169,7 @@ def add_common_modify_options(subparser: ArgumentParser):
     )
 
 
-def add_common_deployment_options(subparser: ArgumentParser):
+def add_common_deployment_options(subparser: ArgumentParser) -> None:
     subparser.add_argument(
         "--include",
         nargs="+",

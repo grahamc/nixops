@@ -48,6 +48,8 @@ class S3Backend:
                 self.s3().put_object(
                     Bucket=self.bucket, Key=self.key, Body=b"", **self.encargs()
                 )
+            raise e
+
 
     def onOpen(self, sf: nixops.statefile.StateFile, **kwargs) -> None:
         pass
@@ -57,7 +59,9 @@ class S3Backend:
     # the type definition allows adding new arguments later.
     def uploadFromFile(self, path: str, **kwargs) -> None:
         with open(path, "rb") as f:
-            self.s3().upload_fileobj(f, self.bucket, self.key, ExtraArgs=self.encargs())
+            self.s3().upload_fileobj(
+                f, self.bucket, self.key, ExtraArgs=self.encargs()
+            )
 
         self.unlock(path)
 

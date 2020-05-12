@@ -38,7 +38,7 @@ import nixops.backends
 import nixops.logger
 import nixops.parallel
 from nixops.nix_expr import RawValue, Function, Call, nixmerge, py2nix
-from nixops.ansi import ansi_success
+from nixops.util import ansi_success, Undefined
 from nixops.plugins import get_plugin_manager
 
 Definitions = Dict[str, nixops.resources.ResourceDefinition]

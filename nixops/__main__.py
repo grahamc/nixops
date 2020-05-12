@@ -80,6 +80,7 @@ from nixops.script_defs import (
 import sys
 import nixops
 import nixops.ansi
+from nixops.plugins import registered_plugins
 
 # Set up the parser.
 parser = ArgumentParser(description="NixOS cloud deployment tool", prog="nixops")
@@ -687,7 +688,7 @@ subparser.add_argument(
 )
 subparser.add_argument("--debug", action="store_true", help="enable debug output")
 
-parser_plugin_hooks(parser, subparsers)
+registered_plugins.extend_cli(parser, subparsers)
 
 
 def main() -> None:

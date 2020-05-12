@@ -5,6 +5,7 @@ NixOps
    :maxdepth: 1
    :caption: User Guides:
 
+   guides/installing
    guides/deploy-without-root
 
 .. toctree::

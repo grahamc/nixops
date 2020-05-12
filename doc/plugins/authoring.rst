@@ -152,6 +152,12 @@ Important Notes
    ``ResourceOptions`` is an immutable object that provides type validation both with ``mypy`` _and_ at runtime.
    Any attributes which are not explicitly typed are passed through as-is.
 
+   ``NeatCloudMachineOptions`` is a typed object for holding all of
+   the Nix options passed from the Nix Module. Each option in the Nix
+   module should be represented in this object.
+
+
+Where your plugin used to use:
 
 On with Poetry
 **************

@@ -32,14 +32,7 @@ from argparse import Namespace
 from types import TracebackType
 from typing import Type
 
-from nixops.plugins import get_plugin_manager
-
-
-pm = get_plugin_manager()
-[
-    [importlib.import_module(mod) for mod in pluginimports]
-    for pluginimports in pm.hook.load()
-]
+from nixops.plugins import registered_plugins
 
 
 @contextlib.contextmanager
@@ -63,7 +56,7 @@ def op_list_plugins(args):
         tbl = create_table([("Installed Plugins", "c"), ("Plugin Reference", "c")])
     else:
         tbl = create_table([("Installed Plugins", "c")])
-    for plugin in sorted(pm.list_name_plugin()):
+    for plugin in registered_plugins.list_plugins_with_names():
         if args.verbose:
             tbl.add_row([plugin[0], plugin[1].__str__()])
         else:

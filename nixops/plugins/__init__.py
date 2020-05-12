@@ -29,6 +29,9 @@ class NixOpsFeatureful:
     def __init__(self) -> None:
         self.pm = _get_plugin_pm()
 
+    def list_plugins_with_names(self) -> List[str]:
+        return sorted(self.pm.list_name_plugin())
+
     def extend_cli(self, parser: ArgumentParser, subparsers: _SubParsersAction) -> None:
         self.pm.hook.parser(parser=parser, subparsers=subparsers)
 

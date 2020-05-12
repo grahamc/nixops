@@ -1184,7 +1184,3 @@ def add_common_deployment_options(subparser: ArgumentParser):
 
 def error(msg):
     sys.stderr.write(nixops.util.ansi_warn("error: ") + msg + "\n")
-
-
-def parser_plugin_hooks(parser, subparsers):
-    pm.hook.parser(parser=parser, subparsers=subparsers)

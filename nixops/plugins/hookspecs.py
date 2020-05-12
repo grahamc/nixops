@@ -4,10 +4,12 @@ from typing import Type, List
 from typing_extensions import Protocol
 from nixops.resources import ResourceDefinition, ResourceState
 from nixops.backends import MachineDefinition, MachineState
+from dataclasses import dataclass
 
 hookspec = pluggy.HookspecMarker("nixops")
 
 
+@dataclass
 class MachineBackendRegistration:
     # get_type          -> how it is stored in the database
     # get_resource_type -> `resources.«name».options`
@@ -17,6 +19,7 @@ class MachineBackendRegistration:
     state_record: Type[MachineState]
 
 
+@dataclass
 class ResourceBackendRegistration:
     # get_type          -> how it is stored in the database
     # get_resource_type -> `resources.«name».options`
@@ -28,13 +31,13 @@ class ResourceBackendRegistration:
 
 class NixOpsPlugin(Protocol):
     def machine_backends(self) -> List[MachineBackendRegistration]:
-        pass
+        return []
 
     def resource_backends(self) -> List[ResourceBackendRegistration]:
-        pass
+        return []
 
     def nix_expression_files(self) -> List[Path]:
-        pass
+        return []
 
     def cli_extension(self, parser, subparsers):
         pass

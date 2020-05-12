@@ -37,7 +37,10 @@ class NixOpsFeatureful:
 
         self._nix_expressions: Set[Path] = set()
 
+        self._plugins: List[NixOpsPlugin] = []
+
         for plugin in self.pm.hook.register_plugin():
+            self._plugins.append(plugin)
             # todo: verify that all the nix names and database names are unique across machine and resource backends
 
             self._nix_expressions.update(plugin.nix_expression_files())
@@ -92,7 +95,8 @@ class NixOpsFeatureful:
         return self.machine_backend_states.get(database_name)
 
     def extend_cli(self, parser: ArgumentParser, subparsers: _SubParsersAction) -> None:
-        self.pm.hook.parser(parser=parser, subparsers=subparsers)
+        for plugin in self._plugins:
+            plugin.cli_extension(parser, subparsers)
 
 
 registered_plugins = NixOpsFeatureful()

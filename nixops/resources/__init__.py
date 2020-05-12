@@ -3,7 +3,7 @@
 import re
 import nixops.util
 from threading import Event
-from typing import List, Optional, Dict, Any, Iterator
+from typing import List, Optional, Dict, Any, Iterator, TypeVar, Generic, Type
 from nixops.state import StateDict
 from nixops.diff import Diff, Handler
 from nixops.util import ImmutableMapping, ImmutableValidatedObject
@@ -50,10 +50,22 @@ class ResourceDefinition:
         return self.get_type()
 
 
-class ResourceState(object):
+T = TypeVar("T")
+
+
+class ResourceState(Generic[T]):
     """Base class for NixOps resource state objects."""
 
     name: str
+
+    @classmethod
+    def definition_record(cls) -> Type[T]:
+        raise NotImplementedError("definition_record")
+
+    @classmethod
+    def get_resource_type(cls):
+        """A resource type identifier corresponding to the resources.<type> attribute in the Nix expression"""
+        raise NotImplementedError("get_resource_type")
 
     @classmethod
     def get_type(cls) -> str:

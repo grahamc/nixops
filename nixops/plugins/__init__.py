@@ -37,6 +37,7 @@ class NixOpsFeatureful:
 
         self._nix_expressions: Set[Path] = set()
 
+        plugin: NixOpsPlugin
         for plugin in self.pm.hook.register_plugin():
             # todo: verify that all the nix names and database names are unique across machine and resource backends
 
@@ -44,19 +45,19 @@ class NixOpsFeatureful:
 
             for machine_backend in plugin.machine_backends():
                 self.machine_backend_defns[
-                    machine_backend.nix_name
-                ] = machine_backend.definition_record
+                    machine_backend.get_resource_type()
+                ] = machine_backend.definition_record()
                 self.machine_backend_states[
-                    machine_backend.database_name
-                ] = machine_backend.state_record
+                    machine_backend.get_type()
+                ] = machine_backend
 
             for resource_backend in plugin.resource_backends():
                 self.resource_backend_defns[
-                    resource_backend.nix_name
-                ] = resource_backend.definition_record
+                    resource_backend.get_resource_type()
+                ] = resource_backend.definition_record()
                 self.resource_backend_states[
-                    resource_backend.database_name
-                ] = resource_backend.state_record
+                    resource_backend.get_type()
+                ] = resource_backend
 
     def list_plugins_with_names(self) -> List[str]:
         return sorted(self.pm.list_name_plugin())

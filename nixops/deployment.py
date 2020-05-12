@@ -472,17 +472,19 @@ class Deployment:
         config = self.evaluate_config("info")
 
         # Extract machine information.
-        for name, cfg in config["machines"].items():
-            defn = _create_definition(name, cfg, cfg["targetEnv"])
-            self.definitions[name] = defn
+        for machine_name, cfg in config["machines"].items():
+            m_defn = _create_machine_definition(machine_name, cfg, cfg["targetEnv"])
+            self.definitions[machine_name] = m_defn
 
         # Extract info about other kinds of resources.
         for res_type, cfg in config["resources"].items():
-            for name, y in cfg.items():
-                defn = _create_definition(
-                    name, config["resources"][res_type][name], res_type
+            for resource_name, y in cfg.items():
+                r_defn = _create_resource_definition(
+                    resource_name,
+                    config["resources"][res_type][resource_name],
+                    res_type,
                 )
-                self.definitions[name] = defn
+                self.definitions[resource_name] = r_defn
 
     def evaluate_option_value(
         self,
@@ -1678,31 +1680,44 @@ def _subclasses(cls: Any) -> List[Any]:
     return [cls] if not sub else [g for s in sub for g in _subclasses(s)]
 
 
-def _create_definition(
+def _create_machine_definition(
     name: str, config: Dict[str, Any], type_name: str
-) -> nixops.resources.ResourceDefinition:
-    """Create a resource definition object from the given XML representation of the machine's attributes."""
+) -> nixops.backends.MachineDefinition:
+    """Create a machine definition object from the given representation of the machine's attributes."""
 
-    for cls in _subclasses(nixops.resources.ResourceDefinition):
-        if type_name == cls.get_resource_type():
-            return cls(name, nixops.resources.ResourceEval(config))
+    cls = registered_plugins.get_machine_backend_definition_for(type_name)
+    if cls is not None:
+        return cls(name, nixops.resources.ResourceEval(config))
 
     raise nixops.deployment.UnknownBackend(
         "unknown resource type ‘{0}’".format(type_name)
     )
 
 
-def _create_state(depl: Deployment, type: str, name: str, id: int) -> Any:
+def _create_resource_definition(
+    name: str, config: Dict[str, Any], type_name: str
+) -> nixops.resources.ResourceDefinition:
+    """Create a resource definition object from the given representation of the machine's attributes."""
+
+    cls = registered_plugins.get_resource_backend_definition_for(type_name)
+    if cls is not None:
+        return cls(name, nixops.resources.ResourceEval(config))
+
+    raise nixops.deployment.UnknownBackend(
+        "unknown resource type ‘{0}’".format(type_name)
+    )
+
+
+def _create_state(depl: Deployment, database_name: str, name: str, id: int) -> Any:
     """Create a resource state object of the desired type."""
 
-    for cls in _subclasses(nixops.resources.ResourceState):
-        try:
-            if type == cls.get_type():
-                return cls(depl, name, id)
-        except NotImplementedError:
-            pass
+    cls = registered_plugins.get_machine_or_resource_state_for(database_name)
+    if cls is not None:
+        return cls(depl, name, id)
 
-    raise nixops.deployment.UnknownBackend("unknown resource type ‘{0}’".format(type))
+    raise nixops.deployment.UnknownBackend(
+        "unknown resource type ‘{0}’".format(database_name)
+    )
 
 
 # Automatically load all resource types.

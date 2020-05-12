@@ -28,9 +28,18 @@ class NoneDefinition(MachineDefinition):
 class NoneState(MachineState[NoneDefinition]):
     """State of a trivial machine."""
 
+
     @classmethod
     def get_type(cls):
         return "none"
+
+    @classmethod
+    def get_resource_type(cls):
+        return "none"
+
+    @classmethod
+    def definition_record(cls) -> Type[NoneDefinition]:
+        return NoneDefinition
 
     target_host = nixops.util.attr_property("targetHost", None)
     public_ipv4 = nixops.util.attr_property("publicIpv4", None)

@@ -30,10 +30,10 @@ class ResourceBackendRegistration:
 
 
 class NixOpsPlugin(Protocol):
-    def machine_backends(self) -> List[MachineBackendRegistration]:
+    def machine_backends(self) -> List[Type[MachineState]]:
         return []
 
-    def resource_backends(self) -> List[ResourceBackendRegistration]:
+    def resource_backends(self) -> List[Type[ResourceState]]:
         return []
 
     def nix_expression_files(self) -> List[Path]:

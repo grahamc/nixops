@@ -7,6 +7,7 @@ from threading import Event
 from typing import List, Optional, Dict, Any, TypeVar, Union, TYPE_CHECKING
 from nixops.monkey import Protocol
 from nixops.state import StateDict, RecordId
+from typing import List, Optional, Dict, Any, Iterator, TypeVar, Generic, Type
 from nixops.diff import Diff, Handler
 from nixops.util import ImmutableMapping, ImmutableValidatedObject
 from nixops.logger import MachineLogger
@@ -67,6 +68,15 @@ class ResourceState(Protocol[ResourceDefinitionType]):
     """Base class for NixOps resource state objects."""
 
     name: str
+
+    @classmethod
+    def definition_record(cls) -> Type[T]:
+        raise NotImplementedError("definition_record")
+
+    @classmethod
+    def get_resource_type(cls):
+        """A resource type identifier corresponding to the resources.<type> attribute in the Nix expression"""
+        raise NotImplementedError("get_resource_type")
 
     @classmethod
     def get_type(cls) -> str:

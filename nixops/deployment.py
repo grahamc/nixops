@@ -39,7 +39,7 @@ import nixops.logger
 import nixops.parallel
 from nixops.nix_expr import RawValue, Function, Call, nixmerge, py2nix
 from nixops.util import ansi_success, Undefined
-from nixops.plugins import get_plugin_manager
+from nixops.plugins import registered_plugins
 
 Definitions = Dict[str, nixops.resources.ResourceDefinition]
 
@@ -338,9 +338,7 @@ class Deployment:
             self._db.execute("delete from Deployments where uuid = ?", (self.uuid,))
 
     def _nix_path_flags(self) -> List[str]:
-        extraexprs = [
-            path for paths in get_plugin_manager().hook.nixexprs() for path in paths
-        ]
+        extraexprs = registered_plugins.nix_expressions()
 
         flags = (
             list(
@@ -361,9 +359,7 @@ class Deployment:
         args = {key: RawValue(val) for key, val in self.args.items()}
         exprs_ = [RawValue(x) if x[0] == "<" else x for x in exprs]
 
-        extraexprs = [
-            path for paths in get_plugin_manager().hook.nixexprs() for path in paths
-        ]
+        extraexprs = registered_plugins.nix_expressions()
 
         flags.extend(
             [

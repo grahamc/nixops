@@ -13,7 +13,6 @@ import hashlib
 
 
 # For typing
-from nixops.deployment import Deployment
 from nixops.nix_expr import Function
 from nixops.resources import ResourceOptions
 from typing import Optional, List, Dict, Tuple

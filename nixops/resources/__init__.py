@@ -21,7 +21,7 @@ from typing import List, Optional, Dict, Any, Iterator, Mapping, TypeVar, Protoc
 from nixops.state import StateDict
 from nixops.diff import Diff, Handler
 from nixops.util import ImmutableMapping, ImmutableValidatedObject
-from typing_extensions import Literal
+from typing_extensions import Literal, Protocol
 
 
 from nixops.deployment import Deployment
@@ -70,7 +70,6 @@ class ResourceDefinition:
 ResourceDefinitionType = TypeVar(
     "ResourceDefinitionType", bound="ResourceDefinition", contravariant=True
 )
-
 
 class ResourceState(Protocol[ResourceDefinitionType]):
     """Base class for NixOps resource state objects."""

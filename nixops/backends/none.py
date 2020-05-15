@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-from typing import Optional
+from typing import Optional, Type
 import nixops.util
-
 from nixops.backends import MachineDefinition, MachineState, MachineOptions
 from nixops.util import attr_property, create_key_pair
 import nixops.resources

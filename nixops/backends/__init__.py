@@ -2,14 +2,14 @@
 from __future__ import annotations
 import os
 import re
-from typing import Mapping, Any, List, Optional, Union, Sequence, TypeVar
+from typing import Mapping, Any, List, Optional, Union, Set, Sequence, TypeVar, Type, Generic
 from nixops.monkey import Protocol, runtime_checkable
 import nixops.util
 import nixops.resources
-import nixops.ssh_util
 from nixops.state import RecordId
 import subprocess
-
+import nixops.ssh_util
+import getpass
 
 class KeyOptions(nixops.resources.ResourceOptions):
     text: Optional[str]
@@ -227,7 +227,7 @@ class MachineState(
                         continue
                     res.failed_units.append(match.group(1))
 
-    def restore(self, defn, backup_id: Optional[str], devices: List[str] = []):
+    def restore(self, defn: MachineDefinitionType, backup_id: Optional[str], devices: List[str] = []):
         """Restore persistent disks to a given backup, if possible."""
         self.warn(
             "don't know how to restore disks from backup for machine ‘{0}’".format(
@@ -245,7 +245,7 @@ class MachineState(
         self.warn("don't know how to list backups for ‘{0}’".format(self.name))
         return {}
 
-    def backup(self, defn, backup_id: str, devices: List[str] = []) -> None:
+    def backup(self, defn: MachineDefinitionType, backup_id: str, devices: List[str] = []) -> None:
         """Make backup of persistent disks, if possible."""
         self.warn(
             "don't know how to make backup of disks for machine ‘{0}’".format(self.name)

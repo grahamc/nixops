@@ -40,6 +40,8 @@ class NixOpsFeatureful:
         self._plugins: List[NixOpsPlugin] = []
 
         for plugin in self.pm.hook.register_plugin():
+            from pprint import pprint
+            pprint(plugin)
             self._plugins.append(plugin)
             # todo: verify that all the nix names and database names are unique across machine and resource backends
 

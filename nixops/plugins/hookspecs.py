@@ -1,14 +1,14 @@
 import pluggy
 from pathlib import Path
-from typing import Type, List
+from typing import Type, List, Any, TypeVar, Callable
 from typing_extensions import Protocol
-from nixops.resources import ResourceDefinition, ResourceState
-from nixops.backends import MachineDefinition, MachineState
+from nixops.resources import ResourceDefinition, ResourceState, ResourceDefinitionType
+from nixops.backends import MachineDefinition, MachineState, MachineDefinitionType
 from dataclasses import dataclass
 
 hookspec = pluggy.HookspecMarker("nixops")
 
-
+T = TypeVar("T")
 @dataclass
 class MachineBackendRegistration:
     # get_type          -> how it is stored in the database

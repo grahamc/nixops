@@ -6,6 +6,10 @@ from nixops.backends import MachineDefinition, MachineState, MachineOptions
 from nixops.util import attr_property, create_key_pair
 import nixops.resources
 
+class MehDefinition(MachineDefinition):
+    """Definition of a trivial machine."""
+    _target_host: str
+    _public_ipv4: Optional[str]
 
 class NoneDefinition(MachineDefinition):
     """Definition of a trivial machine."""
@@ -25,7 +29,7 @@ class NoneDefinition(MachineDefinition):
         self._public_ipv4 = config.get("publicIPv4", None)
 
 
-class NoneState(MachineState):
+class NoneState(MachineState[NoneDefinition]):
     """State of a trivial machine."""
 
     @classmethod

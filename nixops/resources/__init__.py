@@ -4,6 +4,7 @@ from __future__ import annotations
 import re
 import nixops.util
 from threading import Event
+
 from typing import List, Optional, Dict, Any, TypeVar, Union, TYPE_CHECKING
 from nixops.monkey import Protocol
 from nixops.state import StateDict, RecordId
@@ -16,6 +17,14 @@ from typing_extensions import Literal
 if TYPE_CHECKING:
     import nixops.deployment
 
+from typing import List, Optional, Dict, Any, Iterator, Mapping, TypeVar, Protocol, Callable, Generic, Type
+from nixops.state import StateDict
+from nixops.diff import Diff, Handler
+from nixops.util import ImmutableMapping, ImmutableValidatedObject
+from typing_extensions import Literal
+
+
+from nixops.deployment import Deployment
 
 class ResourceEval(ImmutableMapping[Any, Any]):
     pass
@@ -65,6 +74,7 @@ ResourceDefinitionType = TypeVar(
 
 class ResourceState(Protocol[ResourceDefinitionType]):
     """Base class for NixOps resource state objects."""
+    # definition: ResourceDefinitionType
 
     name: str
 
@@ -72,6 +82,7 @@ class ResourceState(Protocol[ResourceDefinitionType]):
     def get_type(cls) -> str:
         """A resource type identifier that must match the corresponding ResourceDefinition class"""
         raise NotImplementedError("get_type")
+
 
     # Valid values for self.state.  Not all of these make sense for
     # all resource types.
@@ -179,23 +190,23 @@ class ResourceState(Protocol[ResourceDefinitionType]):
                 self._set_attr(k, v)
 
     # XXX: Deprecated, use self.logger.* instead!
-    def log(self, *args, **kwargs):
-        return self.logger.log(*args, **kwargs)
+    def log(self, message: str):
+        return self.logger.log(message)
 
-    def log_end(self, *args, **kwargs):
-        return self.logger.log_end(*args, **kwargs)
+    def log_end(self, message: str):
+        return self.logger.log_end(message)
 
-    def log_start(self, *args, **kwargs):
-        return self.logger.log_start(*args, **kwargs)
+    def log_start(self, message: str):
+        return self.logger.log_start(message)
 
-    def log_continue(self, *args, **kwargs):
-        return self.logger.log_continue(*args, **kwargs)
+    def log_continue(self, message: str):
+        return self.logger.log_continue(message)
 
-    def warn(self, *args, **kwargs):
-        return self.logger.warn(*args, **kwargs)
+    def warn(self, message: str):
+        return self.logger.warn(message)
 
-    def success(self, *args, **kwargs):
-        return self.logger.success(*args, **kwargs)
+    def success(self, message: str):
+        return self.logger.success(message)
 
     # XXX: End deprecated methods
 
@@ -269,7 +280,7 @@ class ResourceState(Protocol[ResourceDefinitionType]):
     ):  # TODO this return type is inconsistent with child class MachineState
         """
         Reconcile the state file with the real world infrastructure state.
-        This should not do any provisionning but just sync the state.
+1        This should not do any provisionning but just sync the state.
         """
         self._check()
 

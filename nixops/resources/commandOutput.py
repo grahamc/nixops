@@ -21,6 +21,8 @@ class CommandOutputOptions(ResourceOptions):
     script: str
     name: str
 
+class MehDefinition(nixops.resources.ResourceDefinition):
+    pass
 
 class CommandOutputDefinition(nixops.resources.ResourceDefinition):
     """Definition of a Command Output."""

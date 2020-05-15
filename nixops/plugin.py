@@ -3,6 +3,7 @@ from nixops.backends.none import NoneState, NoneDefinition
 from nixops.resources.commandOutput import CommandOutputDefinition, CommandOutputState
 from nixops.resources.ssh_keypair import SSHKeyPairDefinition, SSHKeyPairState
 from typing import List
+from pathlib import Path
 
 
 class NixOpsCorePlugin(NixOpsPlugin):

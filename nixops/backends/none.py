@@ -25,9 +25,8 @@ class NoneDefinition(MachineDefinition):
         self._public_ipv4 = config.get("publicIPv4", None)
 
 
-class NoneState(MachineState[NoneDefinition]):
+class NoneState(MachineState):
     """State of a trivial machine."""
-
 
     @classmethod
     def get_type(cls):

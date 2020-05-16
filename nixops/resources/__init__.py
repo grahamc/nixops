@@ -17,7 +17,7 @@ from typing_extensions import Literal
 if TYPE_CHECKING:
     import nixops.deployment
 
-from typing import List, Optional, Dict, Any, Iterator, Mapping, TypeVar, Protocol, Callable, Generic, Type
+from typing import List, Optional, Dict, Any, Iterator, Mapping, TypeVar, Callable, Generic, Type
 from nixops.state import StateDict
 from nixops.diff import Diff, Handler
 from nixops.util import ImmutableMapping, ImmutableValidatedObject

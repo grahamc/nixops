@@ -11,6 +11,7 @@ from collections import defaultdict
 import re
 from datetime import datetime, timedelta
 import nixops.statefile
+from nixops.state import RecordId
 import getpass
 import traceback
 import glob
@@ -1708,7 +1709,7 @@ def _create_resource_definition(
     )
 
 
-def _create_state(depl: Deployment, database_name: str, name: str, id: int) -> Any:
+def _create_state(depl: Deployment, database_name: str, name: str, id: RecordId) -> Any:
     """Create a resource state object of the desired type."""
 
     cls = registered_plugins.get_machine_or_resource_state_for(database_name)

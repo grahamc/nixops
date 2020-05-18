@@ -23,9 +23,6 @@ from nixops.diff import Diff, Handler
 from nixops.util import ImmutableMapping, ImmutableValidatedObject
 from typing_extensions import Literal, Protocol
 
-
-from nixops.deployment import Deployment
-
 class ResourceEval(ImmutableMapping[Any, Any]):
     pass
 
@@ -279,7 +276,7 @@ class ResourceState(Protocol[ResourceDefinitionType]):
     ):  # TODO this return type is inconsistent with child class MachineState
         """
         Reconcile the state file with the real world infrastructure state.
-1        This should not do any provisionning but just sync the state.
+        This should not do any provisionning but just sync the state.
         """
         self._check()
 
@@ -315,15 +312,14 @@ class ResourceState(Protocol[ResourceDefinitionType]):
         a financial charge (or None if unknown)."""
         return None
 
-
-class DiffEngineResourceState(ResourceState):
+class DiffEngineResourceState(ResourceState[ResourceDefinitionType], Protocol[ResourceDefinitionType]):
     _reserved_keys: List[str] = []
-
-    def __init__(self, depl, name, id):
-        nixops.resources.ResourceState.__init__(self, depl, name, id)
+    _state: StateDict
+    def __init__(self, depl: nixops.deployment.Deployment, name: str, id: RecordId):
+        super().__init__(depl, name, id)
         self._state = StateDict(depl, id)
 
-    def create(self, defn, check, allow_reboot, allow_recreate):
+    def create(self, defn: ResourceDefinitionType, check, allow_reboot, allow_recreate):
         # if --check is true check against the api and update the state
         # before firing up the diff engine in order to get the needed
         # handlers calls

@@ -1200,7 +1200,7 @@ class Deployment:
 
             if plan_only:
                 for r in self.active_resources.values():
-                    if isinstance(r, nixops.resources.DiffEngineResourceState):
+                    if nixops.resources.DiffEngineResourceState in r.__class__.mro():
                         plan_worker(r)
                     else:
                         r.warn(

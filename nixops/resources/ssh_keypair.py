@@ -4,23 +4,23 @@
 
 import nixops.util
 import nixops.resources
-
+from typing import Optional
 
 class SSHKeyPairDefinition(nixops.resources.ResourceDefinition):
     """Definition of an SSH key pair."""
 
     @classmethod
-    def get_type(cls):
+    def get_type(cls) -> str:
         return "ssh-keypair"
 
     @classmethod
-    def get_resource_type(cls):
+    def get_resource_type(cls) -> str:
         return "sshKeyPairs"
 
     def __init__(self, name: str, config: nixops.resources.ResourceEval):
         super().__init__(name, config)
 
-    def show_type(self):
+    def show_type(self) -> str:
         return "{0}".format(self.get_type())
 
 
@@ -30,14 +30,14 @@ class SSHKeyPairState(nixops.resources.ResourceState[SSHKeyPairDefinition]):
     state = nixops.util.attr_property(
         "state", nixops.resources.ResourceState.MISSING, int
     )
-    public_key = nixops.util.attr_property("publicKey", None)
-    private_key = nixops.util.attr_property("privateKey", None)
+    public_key: Optional[str] = nixops.util.attr_property("publicKey", None)
+    private_key: Optional[str] = nixops.util.attr_property("privateKey", None)
 
     @classmethod
-    def get_type(cls):
+    def get_type(cls) -> str:
         return "ssh-keypair"
 
-    def __init__(self, depl, name, id):
+    def __init__(self, depl, name, id) -> None:
         nixops.resources.ResourceState.__init__(self, depl, name, id)
         self._conn = None
 

@@ -45,7 +45,7 @@ class ResourceDefinition:
         raise NotImplementedError("get_type")
 
     @classmethod
-    def get_resource_type(cls):
+    def get_resource_type(cls) -> str:
         """A resource type identifier corresponding to the resources.<type> attribute in the Nix expression"""
         return cls.get_type()
 

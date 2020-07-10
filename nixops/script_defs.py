@@ -238,7 +238,7 @@ def op_create(args):
         # When deployment is created without state "name" does not exist
         name = args.deployment
         if "name" in args:
-            name = args.name or args.deployment
+            name = args.name
 
         if name:
             set_name(depl, name)

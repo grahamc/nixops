@@ -75,8 +75,6 @@ class Deployment:
     name: Optional[str] = nixops.util.attr_property("name", None)
     nix_exprs = nixops.util.attr_property("nixExprs", [], "json")
     nix_path = nixops.util.attr_property("nixPath", [], "json")
-    flake_uri = nixops.util.attr_property("flakeUri", None)
-    cur_flake_uri = nixops.util.attr_property("curFlakeUri", None)
     args = nixops.util.attr_property("args", {}, "json")
     description = nixops.util.attr_property("description", default_description)
     configs_path = nixops.util.attr_property("configsPath", None)
@@ -127,8 +125,6 @@ class Deployment:
 
         self.definitions: Optional[Definitions] = None
 
-        self._cur_flake_uri: Optional[str] = None
-
     @property
     def tempdir(self) -> nixops.util.SelfDeletingDir:
         if not self._tempdir:
@@ -136,20 +132,6 @@ class Deployment:
                 tempfile.mkdtemp(prefix="nixops-tmp")
             )
         return self._tempdir
-
-    def _get_cur_flake_uri(self):
-        assert self.flake_uri is not None
-        if self._cur_flake_uri is None:
-            out = json.loads(
-                subprocess.check_output(
-                    ["nix", "flake", "info", "--json", "--", self.flake_uri],
-                    stderr=self.logger.log_file,
-                )
-            )
-            self._cur_flake_uri = out["url"].replace(
-                "ref=HEAD&rev=0000000000000000000000000000000000000000&", ""
-            )  # FIXME
-        return self._cur_flake_uri
 
     @property
     def machines(self) -> Dict[str, nixops.backends.GenericMachineState]:
@@ -436,18 +418,6 @@ class Deployment:
                 (self.expr_path + "/eval-machine-info.nix"),
             ]
         )
-
-        if self.flake_uri is not None:
-            flags.extend(
-                [
-                    # "--pure-eval", # FIXME
-                    "--argstr",
-                    "flakeUri",
-                    self._get_cur_flake_uri(),
-                    "--allowed-uris",
-                    self.expr_path,
-                ]
-            )
 
         return flags
 
@@ -791,8 +761,6 @@ class Deployment:
         # Set the NixOS version suffix, if we're building from Git.
         # That way ‘nixos-version’ will show something useful on the
         # target machines.
-        #
-        # TODO: Implement flake compatible version
         nixos_path = str(self.evaluate_config("nixpkgs"))
         get_version_script = nixos_path + "/modules/installer/tools/get-version-suffix"
         if os.path.exists(nixos_path + "/.git") and os.path.exists(get_version_script):
@@ -990,10 +958,6 @@ class Deployment:
                 if dry_activate:
                     return None
 
-                self.cur_flake_uri = (
-                    self._get_cur_flake_uri() if self.flake_uri is not None else None
-                )
-
                 if res != 0 and res != 100:
                     raise Exception(
                         "unable to activate new configuration (exit code {})".format(
@@ -1020,9 +984,6 @@ class Deployment:
                 # configuration.
                 m.cur_configs_path = configs_path
                 m.cur_toplevel = m.new_toplevel
-                m.cur_flake_uri = (
-                    self._get_cur_flake_uri() if self.flake_uri is not None else None
-                )
 
             except Exception:
                 # This thread shouldn't throw an exception because
@@ -1533,8 +1494,6 @@ class Deployment:
             boot=False,
             max_concurrent_activate=max_concurrent_activate,
         )
-
-        self.cur_flake_uri = None
 
     def rollback(self, **kwargs: Any) -> None:
         with self._get_deployment_lock():

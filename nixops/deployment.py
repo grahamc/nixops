@@ -526,7 +526,6 @@ class Deployment:
         self,
         machine_name: str,
         option_name: str,
-        json: bool = False,
         include_physical: bool = False,
     ) -> str:
         """Evaluate a single option of a single machine in the deployment specification."""
@@ -551,8 +550,8 @@ class Deployment:
                     "false",
                     "-A",
                     "nodes.{0}.config.{1}".format(machine_name, option_name),
+                    "--json",
                 ]
-                + (["--json"] if json else [])
                 stderr=self.logger.log_file,
                 text=True,
             )

@@ -181,8 +181,7 @@ class Diff:
                 self._diff[key] = self.UPDATE
 
     def get_resource_definition(self, key: str) -> Any:
-        def retrieve_def(d):
-            # type: (Any) -> Any
+        def retrieve_def(d: Any) -> Any:
             if isinstance(d, str) and d.startswith("res-"):
                 name = d[4:].split(".")[0]
                 res_type = d.split(".")[1]
@@ -190,10 +189,7 @@ class Diff:
                 res = self._depl.get_generic_resource(name, res_type)
                 if res.state != res.UP:
                     return "computed"
-                try:
-                    d = getattr(res, k)
-                except AttributeError:
-                    d = res._state[k]
+                d = getattr(res, k)
             return d
 
         d = self._definition.get(key, None)

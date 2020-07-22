@@ -5,6 +5,7 @@
 import os
 import nixops.util
 import nixops.resources
+from nixops.operation_options import CreateOptions, DestroyOptions
 
 import tempfile
 import subprocess
@@ -70,11 +71,9 @@ class CommandOutputState(nixops.resources.ResourceState[CommandOutputDefinition]
 
     def create(
         self,
-        defn: CommandOutputDefinition,
-        check: bool,
-        allow_reboot: bool,
-        allow_recreate: bool,
+        options: CreateOptions[CommandOutputDefinition]
     ) -> None:
+        defn = options.definition
         if (
             (defn.config.script is not None)
             and (self.script != defn.config.script)
@@ -109,8 +108,7 @@ class CommandOutputState(nixops.resources.ResourceState[CommandOutputDefinition]
         # type: () -> Dict[str,str]
         return {"value": self.value}
 
-    def destroy(self, wipe=False):
-        # type: (bool) -> bool
+    def destroy(self, options: DestroyOptions[CommandOutputDefinition]) -> bool:
         if self.depl.logger.confirm(
             "are you sure you want to destroy {0}?".format(self.name)
         ):

@@ -5,6 +5,7 @@ import nixops.util
 from nixops.backends import MachineDefinition, MachineState, MachineOptions
 from nixops.util import attr_property, create_key_pair
 import nixops.resources
+from nixops.operation_options import CreateOptions, DestroyOptions
 
 
 class NoneDefinition(MachineDefinition):
@@ -64,11 +65,9 @@ class NoneState(MachineState[NoneDefinition]):
 
     def create(
         self,
-        defn: NoneDefinition,
-        check: bool,
-        allow_reboot: bool,
-        allow_recreate: bool,
+        options: CreateOptions[NoneDefinition]
     ):
+        defn = options.definition
         assert isinstance(defn, NoneDefinition)
         self.set_common_state(defn)
         self.target_host = defn._target_host
@@ -125,6 +124,6 @@ class NoneState(MachineState[NoneDefinition]):
         if res.is_up:
             super()._check(res)
 
-    def destroy(self, wipe=False):
+    def destroy(self, options: DestroyOptions[NoneDefinition]):
         # No-op; just forget about the machine.
         return True

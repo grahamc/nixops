@@ -4,7 +4,7 @@
 
 import nixops.util
 import nixops.resources
-
+from nixops.operation_options import CreateOptions
 
 class SSHKeyPairDefinition(nixops.resources.ResourceDefinition):
     """Definition of an SSH key pair."""
@@ -45,10 +45,7 @@ class SSHKeyPairState(nixops.resources.ResourceState[SSHKeyPairDefinition]):
 
     def create(
         self,
-        defn: SSHKeyPairDefinition,
-        check: bool,
-        allow_reboot: bool,
-        allow_recreate: bool,
+        options: CreateOptions[SSHKeyPairDefinition]
     ):
         # Generate the key pair locally.
         if not self.public_key:

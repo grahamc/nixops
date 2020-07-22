@@ -44,6 +44,7 @@ from nixops.plugins.manager import (
     MachineHooksManager,
     PluginManager,
 )
+from .operation_options import CreateOptions, DestroyOptions
 
 from nixops.nix_expr import RawValue, Function, Call, nixmerge, py2nix
 from nixops.ansi import ansi_success
@@ -1333,12 +1334,13 @@ class Deployment:
                     # Now create the resource itself.
                     if not r.creation_time:
                         r.creation_time = int(time.time())
-                    r.create(
+                    create_options = CreateOptions(
                         self._definition_for_required(r.name),
                         check=check,
                         allow_reboot=allow_reboot,
                         allow_recreate=allow_recreate,
                     )
+                    r.create(create_options)
 
                     if is_machine(r):
                         # NOTE: unfortunate mypy doesn't check that
@@ -1588,7 +1590,7 @@ class Deployment:
                             return
                 except AttributeError:
                     pass
-                if m.destroy(wipe=wipe):
+                if m.destroy(DestroyOptions(wipe=wipe)):
                     self.delete_resource(m)
             except Exception:
                 m._errored = True

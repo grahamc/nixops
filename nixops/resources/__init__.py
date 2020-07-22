@@ -11,6 +11,8 @@ from nixops.diff import Diff, Handler
 from nixops.util import ImmutableMapping, ImmutableValidatedObject
 from nixops.logger import MachineLogger
 from typing_extensions import Literal
+from nixops.operation_options import CreateOptions, DestroyOptions
+
 
 if TYPE_CHECKING:
     import nixops.deployment
@@ -280,10 +282,7 @@ class ResourceState(Protocol[ResourceDefinitionType]):
 
     def create(
         self,
-        defn: ResourceDefinitionType,
-        check: bool,
-        allow_reboot: bool,
-        allow_recreate: bool,
+        options: CreateOptions[ResourceDefinitionType]
     ):
         """Create or update the resource defined by ‘defn’."""
         raise NotImplementedError("create")
@@ -304,7 +303,7 @@ class ResourceState(Protocol[ResourceDefinitionType]):
         """Actions to be performed after the network is activated"""
         return
 
-    def destroy(self, wipe=False):
+    def destroy(self, options: DestroyOptions[ResourceDefinitionType]) -> bool:
         """Destroy this resource, if possible."""
         self.logger.warn("don't know how to destroy resource ‘{0}’".format(self.name))
         return False
@@ -341,16 +340,16 @@ class DiffEngineResourceState(
         nixops.resources.ResourceState.__init__(self, depl, name, id)
         self._state = StateDict(depl, id)
 
-    def create(self, defn: ResourceDefinitionType, check: bool, allow_reboot: bool, allow_recreate: bool):
+    def create(self, options: CreateOptions[ResourceDefinitionType]):
         # if --check is true check against the api and update the state
         # before firing up the diff engine in order to get the needed
         # handlers calls
-        if check:
+        if options.check:
             self._check()
-        diff_engine = self.setup_diff_engine(defn)
+        diff_engine = self.setup_diff_engine(options.definition)
 
         for handler in diff_engine.plan():
-            handler.handle(allow_recreate)
+            handler.handle(options.allow_recreate)
 
     def plan(self, defn):
         if hasattr(self, "_state"):

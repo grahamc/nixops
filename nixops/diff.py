@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import itertools
 
-from typing import Any, AnyStr, Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, AnyStr, Callable, Dict, List, Optional, Tuple, Generic, TYPE_CHECKING
 from nixops.logger import MachineLogger
 from nixops.state import StateDict
+from nixops.resources import ResourceDefinitionType
 
 if TYPE_CHECKING:
     import nixops.deployment
@@ -42,7 +43,7 @@ class Handler:
         return self._keys
 
 
-class Diff:
+class Diff(Generic[ResourceDefinitionType]):
     """
     Diff engine main class which implements methods for doing diffs between
     the state/config and generating a plan: sequence of handlers to be executed.
@@ -56,12 +57,12 @@ class Diff:
         self,
         depl: nixops.deployment.Deployment,
         logger: MachineLogger,
-        config: Dict[str, Any],
+        defn: ResourceDefinitionType,
         state: StateDict,
         res_type: str,
     ) -> None:
         self.handlers: List[Handler] = []
-        self._definition = config
+        self._definition = defn.resource_eval
         self._state = state
         self._depl = depl
         self._type = res_type
@@ -130,8 +131,8 @@ class Diff:
         dependencies.
         """
         # TODO implement cycle detection
-        parent = {}  # type: Dict[Handler, Optional[Handler]]
-        sequence = []  # type: List[Handler]
+        parent: Dict[Handler, Optional[Handler]] = {}
+        sequence: List[Handler] = []
 
         def visit(handler: Handler) -> None:
             for v in handler.get_deps():

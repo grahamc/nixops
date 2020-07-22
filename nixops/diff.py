@@ -11,6 +11,7 @@ from typing import (
     Optional,
     Tuple,
     Generic,
+    TypeVar,
     TYPE_CHECKING,
 )
 from nixops.logger import MachineLogger
@@ -18,7 +19,11 @@ from nixops.state import StateDict
 
 if TYPE_CHECKING:
     import nixops.deployment
-    from nixops.resources import ResourceDefinitionType
+
+# Note: redefined to avoid import loops
+ResourceDefinitionType = TypeVar(
+    "ResourceDefinitionType", bound="nixops.resources.ResourceDefinition"
+)
 
 
 class Handler:
@@ -53,7 +58,7 @@ class Handler:
         return self._keys
 
 
-class Diff(Generic["ResourceDefinitionType"]):
+class Diff(Generic[ResourceDefinitionType]):
     """
     Diff engine main class which implements methods for doing diffs between
     the state/config and generating a plan: sequence of handlers to be executed.
@@ -204,7 +209,9 @@ class Diff(Generic["ResourceDefinitionType"]):
                 try:
                     d = getattr(res, k)
                 except AttributeError:
-                    d = res._state[k]
+                    # TODO res._state is private and should not be reached in to.
+                    # Make sure nixops-aws still works when fixing this.
+                    d = res._state[k]  # type: ignore
             return d
 
         d = self._definition.get(key, None)

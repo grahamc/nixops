@@ -2,9 +2,13 @@ from __future__ import annotations
 
 import itertools
 
-from typing import Any, AnyStr, Callable, Dict, List, Optional, Tuple
+from typing import Any, AnyStr, Callable, Dict, List, Optional, Tuple, TYPE_CHECKING
 from nixops.logger import MachineLogger
 from nixops.state import StateDict
+
+if TYPE_CHECKING:
+    import nixops.deployment
+    from nixops.resources import ResourceDefinitionType
 
 
 class Handler:
@@ -51,16 +55,12 @@ class Diff:
 
     def __init__(
         self,
-        # FIXME: type should be 'nixops.deployment.Deployment'
-        # however we have to upgrade to python3 in order
-        # to solve the import cycle by forward declaration
-        depl: Any,
+        depl: nixops.deployment.Deployment,
         logger: MachineLogger,
         config: Dict[str, Any],
         state: StateDict,
         res_type: str,
-    ):
-        # type: (...) -> None
+    ) -> None:
         self.handlers: List[Handler] = []
         self._definition = config
         self._state = state
